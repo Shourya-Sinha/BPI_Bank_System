@@ -46,8 +46,9 @@ app.use(xss());
 
 //Routes
 app.use(routes);
-
+console.log("Routes object: ", routes);
 app.use(express.static(path.join(__dirname, '/MyBank/dist')));
+console.log(path.join(__dirname, '/MyBank/dist')); // Path verification
 
 app.get("*", (req, res) => {
 	res.sendFile(path.join(__dirname, "MyBank", "dist", "index.html"));
