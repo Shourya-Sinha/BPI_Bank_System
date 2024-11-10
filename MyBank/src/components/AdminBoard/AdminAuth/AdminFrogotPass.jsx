@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Button, Container, Stack, TextField, Typography } from '@mui/material';
-import BPILogo from "../../../assets/logo-desktop.jpg";
 import Logo from "../../../assets/logo.svg";
 import { Link } from 'react-router-dom';
 
@@ -18,7 +17,7 @@ const AdminFrogotPass = () => {
         >
           <Box>
             <img
-              src={BPILogo}
+              src={Logo}
               alt="Bpi Logo "
               style={{ width: 200, height: 80 }}
             />

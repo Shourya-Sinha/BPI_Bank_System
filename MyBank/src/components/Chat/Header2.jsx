@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Logo from "../../assets/logo-desktop.jpg";
+import Logo2 from '../../assets/logo.svg';
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { CaretDown, MagnifyingGlass } from "phosphor-react";
 import DrawerComponent from "../DrawerComponent";
@@ -48,7 +48,7 @@ const Header2 = () => {
           <Stack direction="row" alignItems={"center"} spacing={2}>
             {/* Logo */}
             <Stack alignItems={"center"} sx={{ width: "120px" }} component={Link} to="/app">
-              <img src={Logo} alt="Logo" />
+              <img src={Logo2} alt="Logo" />
             </Stack>
 
             <Stack direction={"row"} spacing={2} alignItems={"center"}>

@@ -26,7 +26,7 @@ import {
 } from "phosphor-react";
 import { Layout, Menu, theme, Button as AntDButton } from "antd";
 const { Header, Sider, Content } = Layout;
-import Logo from "../../../assets/logo-copy.svg";
+import Logo from '../../../assets/logo.svg';
 import {
   Avatar,
   Box,

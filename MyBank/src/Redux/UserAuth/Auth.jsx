@@ -227,7 +227,6 @@ export function LoginAdmin(formValues) {
     await axios
       .post("/admin/login-admin", formValues, { withCredentials: true })
       .then(function (response) {
-        console.log(response);
         dispatch(
           logIn({
             isLoggedIn: true,

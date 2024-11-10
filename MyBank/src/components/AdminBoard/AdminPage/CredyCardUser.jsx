@@ -62,17 +62,41 @@ const CredyCardUser = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <StyledTableRow key={row.name}>
-              <StyledTableCell component="th" scope="row">
+          {/* {rows.map((row) => ( */}
+            <StyledTableRow >
+              {/* <StyledTableCell component="th" scope="row">
                 {row.name}
               </StyledTableCell>
-              <StyledTableCell align="right">{row.calories}</StyledTableCell>
+             
               <StyledTableCell align="right">{row.fat}</StyledTableCell>
               <StyledTableCell align="right">{row.carbs}</StyledTableCell>
-              <StyledTableCell align="right">{row.protein}</StyledTableCell>
+              <StyledTableCell align="right">{row.protein}</StyledTableCell> */}
+               <StyledTableCell align="center"> <span role="img" aria-label="weeping emoji">
+                            😭
+                          </span>{" "}
+                          ON Working</StyledTableCell>
+                        <StyledTableCell align="center">
+                        <span role="img" aria-label="weeping emoji">
+                            😭
+                          </span>
+                        </StyledTableCell>
+                        <StyledTableCell align="center">
+                        <span role="img" aria-label="weeping emoji">
+                            😭
+                          </span>
+                         </StyledTableCell>
+                         <StyledTableCell align="center">
+                         <span role="img" aria-label="weeping emoji">
+                            😭
+                          </span>
+                         </StyledTableCell>
+                         <StyledTableCell align="center">
+                         <span role="img" aria-label="weeping emoji">
+                            😭
+                          </span>
+                         </StyledTableCell>
             </StyledTableRow>
-          ))}
+          {/* ))} */}
         </TableBody>
       </Table>
     </TableContainer>

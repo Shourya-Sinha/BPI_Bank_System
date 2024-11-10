@@ -36,16 +36,16 @@ const formatDateTime = (timestamp) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
-
-
 const TransactionsReport = () => {
   const dispatch = useDispatch();
-  const {allUserTransactions} = useSelector((state)=>state.admin || {allUserTransactions:{}});
+  const { allUserTransactions } = useSelector(
+    (state) => state.admin || { allUserTransactions: {} }
+  );
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const columns = [
-    { id: "txnid", label: "TXN-ID", },
-    { id: "amount", label: "Amount", },
+    { id: "txnid", label: "TXN-ID" },
+    { id: "amount", label: "Amount" },
     {
       id: "currency",
       label: "Currency",
@@ -83,38 +83,62 @@ const TransactionsReport = () => {
     },
   ];
 
-  function createData(txnid,amount,currency, username, email, senderacc, reciveracc,bankname,created) {
-    return { txnid,amount,currency, username, email, senderacc, reciveracc,bankname,created };
+  function createData(
+    txnid,
+    amount,
+    currency,
+    username,
+    email,
+    senderacc,
+    reciveracc,
+    bankname,
+    created
+  ) {
+    return {
+      txnid,
+      amount,
+      currency,
+      username,
+      email,
+      senderacc,
+      reciveracc,
+      bankname,
+      created,
+    };
   }
   const rows = [
-    ...((allUserTransactions?.homeBank || []).map((data) => {
+    ...(allUserTransactions?.homeBank || []).map((data) => {
       return createData(
         data.transactionId ? data.transactionId : "N/A",
         data.amount ? data.amount : "N/A",
         data.currency ? data.currency : "N/A",
-        `${data.receiverUserId?.firstName || "N/A"} ${data.receiverUserId?.lastName || "N/A"}`,
+        `${data.receiverUserId?.firstName || "N/A"} ${
+          data.receiverUserId?.lastName || "N/A"
+        }`,
         data.receiverUserId?.email ? data.receiverUserId?.email : "N/A",
         data.senderBankAccountNumber ? data.senderBankAccountNumber : "N/A",
         data.receiverBankAccountNumber ? data.receiverBankAccountNumber : "N/A",
         data.transactionType ? data.transactionType : "N/A",
-        formatDateTime(data.timestamp),  // Created date
+        formatDateTime(data.timestamp), // Created date
         "Home Bank" // Bank name for homeBank
       );
-    })),
-    ...((allUserTransactions?.anotherBank || []).map((data) => {
+    }),
+    ...(allUserTransactions?.anotherBank || []).map((data) => {
       return createData(
         data.transactionId ? data.transactionId : "N/A",
         data.amount ? data.amount : "N/A",
         data.currency ? data.currency : "N/A",
-        data.anotherBankDetails?.accountHolderName ? data.anotherBankDetails?.accountHolderName : "N/A",
+        data.anotherBankDetails?.accountHolderName
+          ? data.anotherBankDetails?.accountHolderName
+          : "N/A",
         data.receiverUserId?.email ? data.receiverUserId?.email : "N/A",
         data.senderBankAccountId ? data.senderBankAccountId : "N/A", // Adjust according to actual data structure
         data.receiverBankAccountId ? data.receiverBankAccountId : "N/A", // Adjust according to actual data structure
         data.transactionType ? data.transactionType : "N/A",
-        formatDateTime(data.timestamp),  // Created date
-        data.anotherBankDetails?.bankName || "N/A"  // Bank name for anotherBank
+        formatDateTime(data.timestamp), // Created date
+        data.anotherBankDetails?.bankName || "N/A" // Bank name for anotherBank
       );
-    }))
+    }),
   ];
 
   const handleChangePage = (event, newPage) => {
@@ -126,14 +150,15 @@ const TransactionsReport = () => {
     setPage(0);
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     dispatch(fetchAllUserTransactions());
-  },[dispatch]);
+  }, [dispatch]);
 
   return (
     <>
-      <HiddenScrollbarContainer sx={{width:'100%',height:'100%',overflowY:'scroll'}}>
-
+      <HiddenScrollbarContainer
+        sx={{ width: "100%", height: "100%", overflowY: "scroll" }}
+      >
         <Box sx={{ marginTop: 5 }}>
           <Typography variant="h5">All Transactions</Typography>
 
@@ -155,7 +180,7 @@ const TransactionsReport = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {rows
+                    {/* {rows
                       .slice(
                         page * rowsPerPage,
                         page * rowsPerPage + rowsPerPage
@@ -180,7 +205,48 @@ const TransactionsReport = () => {
                             })}
                           </TableRow>
                         );
-                      })}
+                      })} */}
+                    {rows.length > 0 ? (
+                      rows
+                        .slice(
+                          page * rowsPerPage,
+                          page * rowsPerPage + rowsPerPage
+                        )
+                        .map((row) => {
+                          return (
+                            <TableRow
+                              hover
+                              role="checkbox"
+                              tabIndex={-1}
+                              key={row.code}
+                            >
+                              {columns.map((column) => {
+                                const value = row[column.id];
+                                return (
+                                  <TableCell
+                                    key={column.id}
+                                    align={column.align}
+                                  >
+                                    {column.format && typeof value === "number"
+                                      ? column.format(value)
+                                      : value}
+                                  </TableCell>
+                                );
+                              })}
+                            </TableRow>
+                          );
+                        })
+                    ) : (
+                      // Show fallback message if no data is available
+                      <TableRow>
+                        <TableCell colSpan={columns.length} align="center">
+                          <span role="img" aria-label="weeping emoji">
+                            😭
+                          </span>{" "}
+                          No Data Available
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>

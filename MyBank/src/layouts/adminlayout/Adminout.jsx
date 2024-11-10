@@ -11,7 +11,7 @@ import {
 } from "@ant-design/icons";
 import { Layout, Menu, theme,Button as AntDButton } from "antd";
 const { Header, Sider, Content } = Layout;
-import Logo from "../../assets/logo.svg";
+import Logo from '../../assets/logo.svg';
 import { Avatar, Box, Stack, Typography,Button } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { LogoutAdmin } from "../../Redux/UserAuth/Auth";

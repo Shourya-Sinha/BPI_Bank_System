@@ -2,7 +2,7 @@ import { Box, Container, Grid, Stack, Typography } from "@mui/material";
 import React from "react";
 import Logo from "../../assets/logo.svg";
 import { FacebookLogo, InstagramLogo, LinkedinLogo, TwitterLogo, YoutubeLogo } from "phosphor-react";
-import Play from '../../assets/Google_Play_Store.png';
+import Play from '../../assets/playstore.png';
 import Apple from '../../assets/Apple_Store.svg';
 
 

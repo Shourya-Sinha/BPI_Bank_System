@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Avatar,
   Box,
   Button,
@@ -13,18 +14,54 @@ import {
 import UserImage from "../../../assets/user.jpg";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "../../../utils/axios";
-import { showSnackbar } from "../../../Redux/UserAuth/Auth";
+import { showSnackbar, UpdateDetails } from "../../../Redux/UserAuth/Auth";
 import {
   fetchAdminDetails,
   updateIsLoading,
 } from "../../../Redux/Admin/AdminFunction";
 
 const AdminInfo = () => {
+  const [isloading,setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const { adminDetails, isAdminLoading } = useSelector(
     (state) => state.admin || {}
   );
   const [file, setFile] = useState(null);
+  const [formData,setFormData] = useState({
+    firstName: adminDetails.firstName,
+    lastName: adminDetails.lastName,
+    phoneNo: adminDetails.phoneNo,
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleUpdate = async () => {
+    try {
+      setIsLoading(true);
+
+      const response = await UpdateDetails(formData);
+    // console.log('response data in page',formData);
+      if (response.status === "success") {
+        console.log("Details updated successfully:", response.data);
+        // Optionally update local state with the new data
+        setFormData({
+          ...formData,// update with latest data if needed
+        });
+        
+      }
+      <Alert type="success" message="Deatils Update Successfully" />
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Failed to update details:", error);
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchAdminDetails());
@@ -116,28 +153,6 @@ const AdminInfo = () => {
                     <Typography variant="body2">
                       {adminDetails.firstName || "N/A"}
                     </Typography>
-                    {/* <Button
-                    onClick={uploadAvatar}
-                    variant="outlined"
-                    component="label"
-                    sx={{
-                      borderRadius: "4px",
-                      padding: "8px 16px",
-                      textTransform: "none",
-                      fontWeight: "bold",
-                      backgroundColor: "#f0f0f0", // Light background
-                      "&:hover": {
-                        backgroundColor: "#dcdcdc", // Hover effect
-                      },
-                    }}
-                  >
-                   {isAdminLoading ? <CircularProgress /> : 'Change Avatar'}
-                    <input
-                      type="file"
-                      hidden
-                      onChange={handleFileChange} // This now only changes the file, not triggering upload
-                    />
-                  </Button> */}
                     <Stack direction={"row"} spacing={2}>
                       <input
                         type="file"
@@ -181,21 +196,31 @@ const AdminInfo = () => {
                   <Stack sx={{ padding: 2 }} direction={"row"} spacing={2}>
                     <TextField fullWidth
                       placeholder="First Name"
-                      value={adminDetails?.firstName || "N/A"}
+                      name="firstName"
+                      onChange={handleInputChange}
+                      // value={adminDetails?.firstName || "N/A"}
+                      value={formData.firstName}
                     />
                     <TextField fullWidth
+                    name='lastName'
                       placeholder="Last Name"
-                      value={adminDetails?.lastName || "N/A"}
+                      onChange={handleInputChange}
+                      // value={adminDetails?.lastName || "N/A"}
+                      value={formData.lastName}
                     />
                   </Stack>
                   <Stack sx={{ padding: 2 }} direction={"row"} spacing={2}>
                     <TextField fullWidth
+                    disabled
                       placeholder="E-mail address"
                       value={adminDetails?.email || "N/A"}
                     />
                     <TextField fullWidth
                       placeholder="Phone No."
-                      value={adminDetails?.phoneNo || "N/A"}
+                      name="phoneNo"
+                      onChange={handleInputChange}
+                      // value={adminDetails?.phoneNo || "N/A"}
+                      value={formData.phoneNo}
                     />
                   </Stack>
                   <Box
@@ -205,7 +230,7 @@ const AdminInfo = () => {
                       marginRight: 11,
                     }}
                   >
-                    <Button variant="contained">Update Details</Button>
+                    <Button variant="contained" onClick={handleUpdate}>{isloading ? <CircularProgress /> :"Update Details"}</Button>
                   </Box>
                 </Box>
               </Box>

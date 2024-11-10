@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import BPILogo from "../../../assets/logo-desktop.jpg";
 import Logo from "../../../assets/logo.svg";
 import {
   Box,
@@ -58,7 +57,7 @@ const Login = () => {
         >
           <Box>
             <img
-              src={BPILogo}
+              src={Logo}
               alt="Bpi Logo "
               style={{ width: 200, height: 80 }}
             />
