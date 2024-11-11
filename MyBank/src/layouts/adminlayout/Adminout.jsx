@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Link, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  Navigate,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import {
   CreditCardOutlined,
   DashboardOutlined,
@@ -9,20 +15,30 @@ import {
   UserAddOutlined,
   UsergroupAddOutlined,
 } from "@ant-design/icons";
-import { Layout, Menu, theme,Button as AntDButton } from "antd";
+import { Layout, Menu, theme, Button as AntDButton } from "antd";
 const { Header, Sider, Content } = Layout;
-import Logo from '../../assets/logo.svg';
-import { Avatar, Box, Stack, Typography,Button } from "@mui/material";
+import Logo from "../../assets/logo.svg";
+import { Avatar, Box, Stack, Typography, Button } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { LogoutAdmin } from "../../Redux/UserAuth/Auth";
-import { getAllUser, getAnnualData, getMonthlyData, getRecentUserData, getWeeklyData } from "../../Redux/Admin/AdminFunction";
+import {
+  fetchAdminDetails,
+  getAllUser,
+  getAnnualData,
+  getMonthlyData,
+  getRecentUserData,
+  getWeeklyData,
+  LogoutAdminn,
+} from "../../Redux/Admin/AdminFunction";
 
 const Adminout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isLoggedIn, user = null } = useSelector((state) => state.auth) || {};
-  const {userList,recentUsers} = useSelector((state)=>state.admin || []);
-  const {weeklyTrans,monthlyTrans,annualTrans} = useSelector((state)=>state.admin);
+  const { userList, recentUsers } = useSelector((state) => state.admin || []);
+  const { weeklyTrans, monthlyTrans, annualTrans, adminDetails } = useSelector(
+    (state) => state.admin
+  );
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const {
@@ -65,10 +81,11 @@ const Adminout = () => {
     location.pathname.includes(item.path)
   )?.key;
 
-  const handleLogout=()=>{
+  const handleLogout = () => {
+    dispatch(LogoutAdminn());
     dispatch(LogoutAdmin());
-    console.log('Logout dispatched');
-  }
+
+  };
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -77,16 +94,15 @@ const Adminout = () => {
     }
   }, [isLoggedIn, navigate]);
 
-   
-
-
-  useEffect(()=>{
+  useEffect(() => {
     dispatch(getAllUser());
     dispatch(getRecentUserData());
     dispatch(getWeeklyData());
     dispatch(getMonthlyData());
     dispatch(getAnnualData());
-  },[dispatch]);
+    dispatch(fetchAdminDetails());
+  }, [dispatch]);
+
   return (
     <>
       <Layout style={{ height: "100vh" }}>
@@ -156,21 +172,34 @@ const Adminout = () => {
               }}
             >
               <Stack direction={"row"} alignItems={"center"} spacing={1}>
-                <Avatar />
+                <Avatar
+                  src={
+                    adminDetails?.avatar?.secure_url
+                      ? adminDetails?.avatar?.secure_url
+                      : ""
+                  }
+                />
                 <Stack direction={"column"}>
                   <Typography variant="body2">
-                  {user ? user.email : 'Null'}
+                    {adminDetails?.email ? adminDetails?.email : "ADMIN"}
                   </Typography>
-                  <Typography variant="caption"> {user ? user.name : 'Null'}</Typography>
+                  <Typography variant="caption">
+                    {" "}
+                    {`${adminDetails?.firstName} ${adminDetails?.lastName}`
+                      ? `${adminDetails?.firstName} ${adminDetails?.lastName}`
+                      : "ADMIN"}
+                  </Typography>
                 </Stack>
               </Stack>
 
-              <Stack direction={'row'} spacing={2} alignItems={'center'}>
+              <Stack direction={"row"} spacing={2} alignItems={"center"}>
                 <Link to={isLoggedIn ? "/admin/userinfo" : "/admin/login"}>
                   {isLoggedIn ? "My Info" : "Admin Login"}
                 </Link>
 
-                <Button sx={{border:'none'}} onClick={handleLogout}>Logout</Button>
+                <Button sx={{ border: "none" }} onClick={handleLogout}>
+                  Logout
+                </Button>
               </Stack>
             </Box>
           </Header>

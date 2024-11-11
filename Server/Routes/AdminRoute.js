@@ -1,6 +1,8 @@
 import { Router } from "express";
 import {
+  approveDepositRequest,
   blockUser,
+  getAdminDepositRequests,
   getAdminDetails,
   getAllTransactionsAdmin,
   getAllUser,
@@ -38,4 +40,6 @@ router.get("/transactions/yearly", protect, isAdmin, getYearlyTransactions);
 router.post('/update-account-status',protect,isAdmin,updateAccountStatus);
 router.get('/get-admin-details',protect,isAdmin,getAdminDetails);
 
+router.patch('/approve-deposit/:transactionId',protect,isAdmin,approveDepositRequest);
+router.get('/get-user-deposite-request',protect,isAdmin,getAdminDepositRequests);
 export default router;

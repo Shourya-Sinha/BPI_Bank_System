@@ -13,7 +13,9 @@ const anotherBankTransactionSchema = new mongoose.Schema({
     },
     receiverUserId: {
         type: String,
-        required: true,
+        required: function() {
+            return this.transactionType !== "deposit";
+        }
     },
     senderBankAccountId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -26,11 +28,15 @@ const anotherBankTransactionSchema = new mongoose.Schema({
     },
     receiverBankAccountId: {
         type: String,
-        required: true,
+        required: function() {
+            return this.transactionType !== "deposit";
+        }
     },
     receiverAccountNumber:{
         type: String,
-        required: true,
+        required: function() {
+            return this.transactionType !== "deposit";
+        }
     },
     amount: {
         type: Number,
@@ -43,7 +49,7 @@ const anotherBankTransactionSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["pending", "completed", "failed"],
+        enum: ["pending", "completed", "failed","approved","rejected"],
         default: "pending",
         required: true,
     },

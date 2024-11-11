@@ -277,6 +277,14 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  lastLoginTime: {
+    type: Date, // Stores the last successful login time
+    default: null,
+  },
+  lastFailedLoginTime: {
+    type: Date, // Stores the last failed login attempt time
+    default: null,
+  },
 });
 
 userSchema.methods.addDevice = function (deviceId, ip) {

@@ -2,9 +2,13 @@ import { TransactionOutlined } from "@ant-design/icons";
 import { Group, MonetizationOn, Shield } from "@mui/icons-material";
 import {
   Box,
+  FormControl,
   Grid,
   IconButton,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
   Stack,
   styled,
   Table,
@@ -19,7 +23,14 @@ import {
 import { ArrowDown, ArrowUp, ArrowUpRight } from "phosphor-react";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchTodayTransactions } from "../../../Redux/Admin/AdminFunction";
+import {
+  fetchTodayTransactions,
+  getAllDepositeTransactions,
+  getAnnualData,
+  getMonthlyData,
+  getWeeklyData,
+  StatusUpdateDepositRequest,
+} from "../../../Redux/Admin/AdminFunction";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -48,8 +59,9 @@ function createData(
   username,
   email,
   senderacc,
-  reciveracc,
-  bankname,
+  status,
+  txntype,
+  txnstatus,
   created
 ) {
   return {
@@ -59,8 +71,9 @@ function createData(
     username,
     email,
     senderacc,
-    reciveracc,
-    bankname,
+    status,
+    txntype,
+    txnstatus,
     created,
   };
 }
@@ -88,48 +101,49 @@ const formatDateTime = (timestamp) => {
 const MainDash = () => {
   const dispatch = useDispatch();
   const { userList, recentUsers } = useSelector((state) => state.admin || []);
-  const { weeklyTrans, monthlyTrans, annualTrans, todayTransactions } =
-    useSelector((state) => state.admin);
+  const {
+    weeklyTrans,
+    monthlyTrans,
+    annualTrans,
+    allDepositeRequest,
+  } = useSelector((state) => state.admin);
 
   useEffect(() => {
+    dispatch(getWeeklyData())
+    dispatch(getMonthlyData());
+    dispatch(getAnnualData());
     dispatch(fetchTodayTransactions());
+    dispatch(getAllDepositeTransactions());
   }, [dispatch]);
 
-  const rows = [
-    ...(todayTransactions?.homeBank || []).map((data) => {
-      return createData(
-        data.transactionId ? data.transactionId : "N/A",
-        data.amount ? data.amount : "N/A",
-        data.currency ? data.currency : "N/A",
-        `${data.receiverUserId?.firstName || "N/A"} ${
-          data.receiverUserId?.lastName || "N/A"
-        }`,
-        data.receiverUserId?.email ? data.receiverUserId?.email : "N/A",
-        data.senderBankAccountNumber ? data.senderBankAccountNumber : "N/A",
-        data.receiverBankAccountNumber ? data.receiverBankAccountNumber : "N/A",
-        data.transactionType ? data.transactionType : "N/A",
-        formatDateTime(data.timestamp), // Created date
-        "Home Bank" // Bank name for homeBank
-      );
-    }),
+  console.log(
+    "deposite transaction in main dashboard admin",
+    allDepositeRequest
+  );
 
-    ...(todayTransactions?.anotherBank || []).map((data) => {
+  const rows = Array.isArray(allDepositeRequest) 
+  ? allDepositeRequest.map((data) => {
       return createData(
-        data.transactionId ? data.transactionId : "N/A",
-        data.amount ? data.amount : "N/A",
-        data.currency ? data.currency : "N/A",
-        data.anotherBankDetails?.accountHolderName
-          ? data.anotherBankDetails?.accountHolderName
-          : "N/A",
-        data.receiverUserId?.email ? data.receiverUserId?.email : "N/A",
-        data.senderBankAccountId ? data.senderBankAccountId : "N/A", // Adjust according to actual data structure
-        data.receiverBankAccountId ? data.receiverBankAccountId : "N/A", // Adjust according to actual data structure
-        data.transactionType ? data.transactionType : "N/A",
-        formatDateTime(data.timestamp), // Created date
-        data.anotherBankDetails?.bankName || "N/A" // Bank name for anotherBank
+        data?.transactionId ? data.transactionId : "N/A",
+        data?.amount ? data.amount : "N/A",
+        data?.currency ? data.currency : "N/A",
+        `${data?.senderUserId?.firstName || "N/A"} ${data?.senderUserId?.lastName || "N/A"}`,
+        data?.senderUserId?.email ? data.senderUserId?.email : "N/A",
+        data?.senderAccountNumber ? data.senderAccountNumber : "N/A", 
+        data?.status ? data?.status : "N/A",
+        data?.transactionType ? data.transactionType : "N/A",
+        data?.status ? data?.status : "N/A",
+        formatDateTime(data?.timestamp) // Created date
       );
-    }),
-  ];
+    })
+  : [];
+
+  const handleStatusChange = (transactionId, newStatus) => {
+    dispatch(StatusUpdateDepositRequest(transactionId, newStatus));
+    dispatch(getAllDepositeTransactions());
+  };
+
+  // console.log('todaytransactions in maindashboard',todayTransactions)
   return (
     <>
       <HiddenScrollbarContainer
@@ -641,10 +655,9 @@ const MainDash = () => {
                     <StyledTableCell align="center">
                       Sender Acc No.
                     </StyledTableCell>
-                    <StyledTableCell align="center">
-                      Receiver Acc No.
-                    </StyledTableCell>
+                    <StyledTableCell align="center">TXN-Status</StyledTableCell>
                     <StyledTableCell align="center">TXN-Type</StyledTableCell>
+                    <StyledTableCell align="center">TXN-Status</StyledTableCell>
                     <StyledTableCell align="center">Created At</StyledTableCell>
                   </TableRow>
                 </TableHead>
@@ -688,10 +701,40 @@ const MainDash = () => {
                           {row.senderacc}
                         </StyledTableCell>
                         <StyledTableCell align="center">
-                          {row.reciveracc}
+                          {row.status === "completed" ||
+                          row.status === "rejected" ? (
+                            // Display plain text if the status is "completed" or "rejected"
+                            <span>{row.status}</span>
+                          ) : (
+                            // Show the dropdown selector only if the status is "pending"
+                            <FormControl variant="outlined" size="small">
+                              <InputLabel>Status</InputLabel>
+                              <Select
+                                value={row.status}
+                                onChange={(e) =>
+                                  handleStatusChange(row.txnid, e.target.value)
+                                }
+                                label="Status"
+                              >
+                                <MenuItem value="pending">Pending</MenuItem>
+                                <MenuItem value="approved">Approved</MenuItem>
+                                <MenuItem value="rejected">Rejected</MenuItem>
+                              </Select>
+                            </FormControl>
+                          )}
                         </StyledTableCell>
                         <StyledTableCell align="center">
-                          {row.bankname}
+                          {row.txntype}
+                        </StyledTableCell>
+                        <StyledTableCell
+                          align="center"
+                          sx={{
+                            textTransform: "capitalize",
+                            color:
+                              row.txnstatus === "completed" ? "green" : "red",
+                          }}
+                        >
+                          {row.txnstatus}
                         </StyledTableCell>
                         <StyledTableCell align="center">
                           {row.created}

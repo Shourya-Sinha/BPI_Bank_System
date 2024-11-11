@@ -27,11 +27,21 @@ const AdminInfo = () => {
     (state) => state.admin || {}
   );
   const [file, setFile] = useState(null);
-  const [formData,setFormData] = useState({
-    firstName: adminDetails.firstName,
-    lastName: adminDetails.lastName,
-    phoneNo: adminDetails.phoneNo,
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    phoneNo: "",
   });
+
+  useEffect(() => {
+    if (adminDetails) {
+      setFormData({
+        firstName: adminDetails.firstName || "",
+        lastName: adminDetails.lastName || "",
+        phoneNo: adminDetails.phoneNo || "",
+      });
+    }
+  }, [adminDetails]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

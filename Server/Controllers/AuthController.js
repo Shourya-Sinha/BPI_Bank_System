@@ -221,23 +221,23 @@ export const loginUser = async (req, res, next) => {
       user.password
     );
     if (!isCorrectPassword) {
+      user.lastFailedLoginTime = moment().toDate();
+      await user.save();
+
       return res.status(401).json({
         status: "error",
         message: "Incorrect password",
       });
     }
 
-    // if (user.isPasswordExpired()){
-    //   return res.status(401).json({
-    //     status: "error",
-    //     message: "Password has expired. Please update your password.",
-    //   });
-    // }
+    const lastLoginTime = user.lastLoginTime;
+
+    // Update the user's last login time with the current timestamp
+    user.lastLoginTime = moment().toDate();
+    await user.save();
 
     const token = signToken(user._id);
 
-    // const cookieExpiresIn = process.env.JWT_COOKIE_EXPIRES_IN;
-    // const cookieExpiryDate = moment().add(cookieExpiresIn, "days").toDate();
     const cookieExpiresIn = parseInt(
       process.env.JWT_COOKIE_EXPIRES_IN || "1",
       10
@@ -250,13 +250,6 @@ export const loginUser = async (req, res, next) => {
       secure: process.env.NODE_ENV === "production", // Ensures it's sent securely in production
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     });
-
-    // res.cookie("refreshToken", token, {
-    //   expires: cookieExpiryDate,
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === "production",
-    //   sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-    // });
 
     return res.status(200).json({
       status: "success",
@@ -1684,6 +1677,10 @@ export const getWeeklyTransactions = async (req, res) => {
       createdAt: { $gte: startOfWeek },
     }).sort({ createdAt: -1 });
 
+    const anotherBankTransactions = await AnotherBankTransaction.find({
+      timestamp: { $gte: startOfWeek },
+    }).sort({ createdAt: -1 });
+
     // Retrieve accounts created in the current week with an initial deposit
     const newAccountsWithDeposit = await UserBank.find({
       createdAt: { $gte: startOfWeek },
@@ -1693,6 +1690,7 @@ export const getWeeklyTransactions = async (req, res) => {
     // Combine both transaction sets into a single response
     const combinedTransactions = [
       ...weeklyTransactions,
+      ...anotherBankTransactions,
       ...newAccountsWithDeposit.map((account) => ({
         _id: account._id,
         userId: account.userId,
@@ -1728,61 +1726,128 @@ export const getWeeklyTransactions = async (req, res) => {
 
 export const getMonthlyTransactions = async (req, res) => {
   try {
-    // Get the start and end of the current month
     const startOfMonth = moment().startOf("month").toDate();
     const endOfMonth = moment().endOf("month").toDate();
 
-    // Retrieve all transactions within the current month
     const monthlyTransactions = await Transaction.find({
-      timestamp: { $gte: startOfMonth, $lte: endOfMonth },
+      createdAt: { $gte: startOfMonth, $lte: endOfMonth },
+    }).sort({ createdAt: -1 });
+
+    const newAccountsWithDeposit = await UserBank.find({
+      createdAt: { $gte: startOfMonth, $lte: endOfMonth },
+      balance: { $gt: 0 },
     });
 
-    // Calculate the total amount for all monthly transactions
-    const totalAmount = monthlyTransactions.reduce(
+    const combinedTransactions = [
+      ...monthlyTransactions,
+      ...newAccountsWithDeposit.map((account) => ({
+        _id: account._id,
+        userId: account.userId,
+        amount: account.balance,
+        createdAt: account.createdAt,
+        details: {
+          bankName: account.bankName,
+          accountNumber: account.accountNumber,
+          balance: account.balance,
+          depositedAt: account.depositedAt || account.createdAt,
+        },
+      })),
+    ];
+
+    const totalAmount = combinedTransactions.reduce(
       (acc, transaction) => acc + transaction.amount,
       0
     );
 
     return res.status(200).json({
       status: "success",
-      totalAmount: totalAmount, // Total sum of all amounts for the month
-      monthlyTransactions: monthlyTransactions, // Array of all monthly transactions with details
+      totalAmount,
+      transactions: combinedTransactions,
     });
   } catch (error) {
     return res.status(500).json({
-      error: error.message || "Failed to fetch monthly transactions",
+      status: "error",
+      message: error.message || "Failed to fetch monthly transactions",
     });
   }
 };
 
 export const getYearlyTransactions = async (req, res) => {
   try {
-    // Get the start and end of the current year
     const startOfYear = moment().startOf("year").toDate();
     const endOfYear = moment().endOf("year").toDate();
 
-    // Retrieve all transactions within the current year
     const yearlyTransactions = await Transaction.find({
-      timestamp: { $gte: startOfYear, $lte: endOfYear },
+      createdAt: { $gte: startOfYear, $lte: endOfYear },
+    }).sort({ createdAt: -1 });
+
+    const newAccountsWithDeposit = await UserBank.find({
+      createdAt: { $gte: startOfYear, $lte: endOfYear },
+      balance: { $gt: 0 },
     });
 
-    // Calculate the total amount for all yearly transactions
-    const totalAmount = yearlyTransactions.reduce(
+    const combinedTransactions = [
+      ...yearlyTransactions,
+      ...newAccountsWithDeposit.map((account) => ({
+        _id: account._id,
+        userId: account.userId,
+        amount: account.balance,
+        createdAt: account.createdAt,
+        details: {
+          bankName: account.bankName,
+          accountNumber: account.accountNumber,
+          balance: account.balance,
+          depositedAt: account.depositedAt || account.createdAt,
+        },
+      })),
+    ];
+
+    const totalAmount = combinedTransactions.reduce(
       (acc, transaction) => acc + transaction.amount,
       0
     );
 
     return res.status(200).json({
       status: "success",
-      totalAmount: totalAmount, // Total sum of all amounts for the year
-      yearlyTransactions: yearlyTransactions, // Array of all yearly transactions with details
+      totalAmount,
+      transactions: combinedTransactions,
     });
   } catch (error) {
     return res.status(500).json({
-      error: error.message || "Failed to fetch yearly transactions",
+      status: "error",
+      message: error.message || "Failed to fetch yearly transactions",
     });
   }
 };
+
+// export const getYearlyTransactions = async (req, res) => {
+//   try {
+//     // Get the start and end of the current year
+//     const startOfYear = moment().startOf("year").toDate();
+//     const endOfYear = moment().endOf("year").toDate();
+
+//     // Retrieve all transactions within the current year
+//     const yearlyTransactions = await Transaction.find({
+//       timestamp: { $gte: startOfYear, $lte: endOfYear },
+//     });
+
+//     // Calculate the total amount for all yearly transactions
+//     const totalAmount = yearlyTransactions.reduce(
+//       (acc, transaction) => acc + transaction.amount,
+//       0
+//     );
+
+//     return res.status(200).json({
+//       status: "success",
+//       totalAmount: totalAmount, // Total sum of all amounts for the year
+//       yearlyTransactions: yearlyTransactions, // Array of all yearly transactions with details
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       error: error.message || "Failed to fetch yearly transactions",
+//     });
+//   }
+// };
 
 export const updateAccountStatus = async (req, res) => {
   try {
@@ -1879,6 +1944,185 @@ export const getAllTransactionsAdmin = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
+    return res.status(500).json({
+      status: "error",
+      message: error.message || "Server error",
+    });
+  }
+};
+
+export const sendDepositRequest = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const { amount, accountNumber } = req.body;
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ message: "Invalid amount specified." });
+    }
+
+    const userBank = await UserBank.findOne({ userId, accountNumber });
+
+    if (!userBank) {
+      return res.status(404).json({ message: "User bank account not found." });
+    }
+
+    const depositRequest = new AnotherBankTransaction({
+      transactionId: `TXNDEP-${Date.now()}`,
+      senderUserId: userId, // ID of the user making the request
+      receiverUserId: null, // Set to null, admin is not tied to a specific user ID
+      senderBankAccountId: userBank._id,
+      senderAccountNumber: userBank.accountNumber,
+      receiverBankAccountId: null, // No specific receiver account ID needed
+      receiverAccountNumber: null, // Set to null or leave empty if irrelevant
+      amount,
+      transactionType: "deposit",
+      status: "pending",
+      description: "Deposit request for admin approval",
+  });
+
+    await depositRequest.save();
+
+    return res.status(201).json({
+      status: "success",
+      message: "Deposit request sent to admin.",
+      data: depositRequest,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Controller action to handle status update
+export const approveDepositRequest = async (req, res, next) => {
+  try {
+    const { transactionId } = req.params;
+    const { status } = req.body; // "approved" or "rejected"
+
+    if (!["approved", "rejected"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status." });
+    }
+
+    const transaction = await AnotherBankTransaction.findOne({ transactionId, transactionType: "deposit", status: "pending" });
+    
+    if (!transaction) {
+      return res.status(404).json({ message: "Transaction not found or already processed." });
+    }
+
+    transaction.status = status === "approved" ? "completed" : "rejected";
+    await transaction.save();
+
+    const userBank = await UserBank.findById(transaction.senderBankAccountId);
+    
+    if (!userBank) {
+      return res.status(404).json({ message: "User bank account not found." });
+    }
+
+
+    if (status === "approved") {
+      // Update balance for approval and set a custom description
+      userBank.balance += transaction.amount;
+      userBank.depositedAt = new Date();
+      userBank.description = `Deposit of ${transaction.amount} approved and added to the account.`;
+    } else if (status === "rejected") {
+      // Set description for rejection
+      userBank.description = `Deposit request of ${transaction.amount} rejected.`;
+    }
+
+    await userBank.save();
+
+    return res.status(200).json({
+      status: "success",
+      message: `Deposit request ${status} successfully.`,
+      data: transaction,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+export const getUserDepositRequests = async (req, res, next) => {
+  try {
+    const { userId } = req;
+
+    // Retrieve all deposit requests for the specific user
+    const userRequests = await AnotherBankTransaction.find({
+      senderUserId: userId,
+      transactionType: "deposit",
+      status:"pending"
+
+    }).sort({ timestamp: -1 }); // Sort by latest
+
+    return res.status(200).json({
+      status: "success",
+      data: userRequests,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getAdminDepositRequests = async (req, res, next) => {
+  try {
+    const { status } = req.query; // Optional status filter (e.g., pending, completed, failed)
+
+    // Base query to find deposit transactions
+    const query = { transactionType: "deposit",status:'pending' };
+
+    // If a status query is provided, add it to the query object
+    if (status) {
+      query.status = status;
+    }
+
+    // Retrieve deposit requests based on the query, sorted by the latest timestamp
+    const allRequests = await AnotherBankTransaction.find(query).sort({ timestamp: -1 }).populate('senderUserId').select('-password -otp');
+
+    return res.status(200).json({
+      status: "success",
+      data: allRequests,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getUserLoginDetails = async (req, res) => {
+  try {
+    // Get the userId from the request (e.g., from JWT payload or query params)
+    const {userId} = req;  // Assuming the user ID is available in req.user after authentication
+
+    // Fetch the user by ID, selecting only the login times
+    const user = await User.findById(userId).select("lastLoginTime lastFailedLoginTime");
+
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    // Get the last login time and last failed login time
+    const lastLoginTime = user.lastLoginTime
+      ? moment(user.lastLoginTime).format("YYYY-MM-DD HH:mm:ss") // Format as per your needs
+      : "No login recorded";
+
+    const lastFailedLoginTime = user.lastFailedLoginTime
+      ? moment(user.lastFailedLoginTime).format("YYYY-MM-DD HH:mm:ss") // Format as per your needs
+      : "No failed login recorded";
+
+    return res.status(200).json({
+      status: "success",
+      message: "User login details fetched successfully",
+      data: {
+        lastLoginTime,
+        lastFailedLoginTime,
+      },
+    });
+  } catch (error) {
     return res.status(500).json({
       status: "error",
       message: error.message || "Server error",

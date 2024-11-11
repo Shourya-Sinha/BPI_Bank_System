@@ -1,20 +1,18 @@
 import { AccountBalance, BackupTable, Groups } from "@mui/icons-material";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { Box, Dialog, IconButton, Stack, Typography } from "@mui/material";
 import { User } from "phosphor-react";
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 const Transfer = ({ setShowTransferPanel }) => {
   const navigate = useNavigate();
-
-  // Close panel on link click
   const handleClosePanel = (path) => {
     navigate(path);
     setShowTransferPanel(false); // Close the transfer panel
   };
   return (
     <>
-      <Box
+    <Box
         sx={{
           maxWidth: 400,
           backgroundColor: "#fff",
@@ -99,6 +97,7 @@ const Transfer = ({ setShowTransferPanel }) => {
           </Stack>
         </Box>
       </Box>
+    {/* </Dialog> */}
     </>
   );
 };

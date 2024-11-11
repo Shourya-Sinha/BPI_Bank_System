@@ -6,10 +6,13 @@ import {
   getTransactionById,
   getTransactionHistory,
   getUserBankDetails,
+  getUserDepositRequests,
   getUserDetails,
+  getUserLoginDetails,
   initiateTransaction,
   initiateTransactionAnotherBank,
   protect,
+  sendDepositRequest,
   updateDetails,
   uploadUserAvatar,
   verifyBankAccount,
@@ -41,7 +44,12 @@ router.get("/get-myTransaction", protect, getTransactionHistory);
 
 router.post("/update-details", protect, updateDetails);
 router.get('/get-my-details',protect,getUserDetails);
+// router.get("/get-bank-details", protect, getUserBankDetails);
 router.get("/get-bank-details", protect, getUserBankDetails);
+router.post("/send-request-deposite", protect,sendDepositRequest);
+router.get('/get-my-deposite',protect,getUserDepositRequests);
+router.get('/get-login-details',protect,getUserLoginDetails);
+
 router.post(
   "/update-image",
   protect,

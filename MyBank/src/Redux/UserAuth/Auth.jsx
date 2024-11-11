@@ -29,12 +29,17 @@ const initialState = {
     otherDeatils: {},
   },
   myAllTransactions: [],
+  myDepositeTransactions:[],
 };
 
 const slice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    updateDepositeTransaction(state,action){
+      state.myDepositeTransactions = state.myDepositeTransactions || [];
+      state.myDepositeTransactions = action.payload.transactions;
+    },
     updateIsLoading(state, action) {
       state.error = action.payload.error;
       state.isLoading = action.payload.isLoading;
@@ -124,6 +129,7 @@ export const {
   updateRegistrationSuccess,
   updateAccCreated,
   resetAccCreated,
+  updateDepositeTransaction,
 } = slice.actions;
 
 export function createBankAcc(formValues) {
@@ -277,27 +283,6 @@ export function LoginUser(formValues) {
   };
 }
 
-// export function RegisterUserFun(formValues) {
-//   return async (dispatch) => {
-//     dispatch(updateIsLoading({ isLoading: true, error: false }));
-//     await axios
-//       .post("/auth/user/register", formValues, { withCredentials: true })
-//       .then(function (response) {
-//         console.log(response);
-//         dispatch(updateRegisterEmail(response.data.email));
-//         dispatch(updateIsLoading({ isLoading: false, error: false }));
-//         dispatch(
-//           showSnackbar({ severity: response.data.status, message: response.data.message })
-//         );
-//         dispatch(updateRegistrationSuccess(true));
-//       })
-//       .catch(function (error) {
-//         console.log(error);
-//         dispatch(showSnackbar({ severity: "error", message: error.message }));
-//         dispatch(updateIsLoading({ isLoading: false, error: true }));
-//       });
-//   };
-// }
 export function RegisterUserFun(formValues) {
   return async (dispatch) => {
     dispatch(updateIsLoading({ isLoading: true, error: false }));
@@ -579,5 +564,54 @@ export const uploadUserAvatar = async (file) => {
   } catch (error) {
     console.error("Error uploading avatar:", error);
     throw error;
+  }
+};
+
+export function DepositeRequestAmount(formValues) {
+  return async (dispatch) => {
+    dispatch(updateIsLoading({ isLoading: true, error: false }));
+    await axios
+      .post("/user/send-request-deposite", formValues, {
+        withCredentials: true,
+      })
+      .then(function (response) {
+        console.log(response);
+        dispatch(updateIsLoading({ isLoading: false, error: false }));
+        dispatch(
+          showSnackbar({
+            severity: response.data.status,
+            message: response.data.message,
+          })
+        );
+      })
+      .catch(function (error) {
+        console.log(error);
+        dispatch(updateIsLoading({ isLoading: false, error: true }));
+        dispatch(showSnackbar({ severity: "error", message: error.message }));
+      });
+  };
+}
+
+export function GetDepositeRequest(){
+  return async (dispatch)=>{
+    await axios.get('/user/get-my-deposite',{withCredentials:true})
+    .then(function (response){
+      console.log(response);
+      dispatch(updateDepositeTransaction({transactions:response.data.data}));
+    })
+  }
+}
+
+export const GetMyLofinDetailsTime = async () => {
+  try {
+    const response = await axios.get("/user/get-login-details", {
+      withCredentials: true,
+    });
+
+    // console.log("Response details", response.data);
+    return response.data; // Returning the response data
+  } catch (error) {
+    console.error("Error in getting user details", error);
+    return null; // Or throw error if you want to handle it elsewhere
   }
 };

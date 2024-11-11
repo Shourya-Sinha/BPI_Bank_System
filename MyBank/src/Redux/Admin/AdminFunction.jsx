@@ -16,12 +16,17 @@ const initialState = {
   adminDetails:{},
   todayTransactions:{},
   allUserTransactions:{},
+  allDepositeRequest:[],
 };
 
 const slice = createSlice({
   name: "admin",
   initialState,
   reducers: {
+    updateAllDepositeRequest(state,action){
+      state.allDepositeRequest = state.allDepositeRequest || [];
+      state.allDepositeRequest = action.payload.allDepositeRequest;
+    },
     updateAllUserTransactions(state,action){
       state.allUserTransactions = action.payload.allUserTransactions;
     },
@@ -51,7 +56,10 @@ const slice = createSlice({
     },
     updateAdminDeatils(state,action){
       state.adminDetails = action.payload.details;
-    }
+    },
+    adminSignOut(state, action) {
+      state.adminDetails = {};
+    },
   },
 });
 
@@ -67,8 +75,37 @@ export const {
   updateRecentUserList,
   updateAdminDeatils,
   updateTodayTransactions,
-  updateAllUserTransactions
+  updateAllUserTransactions,
+  updateAllDepositeRequest,
+  adminSignOut,
 } = slice.actions;
+
+export function LogoutAdminn() {
+  return async (dispatch) => {
+    await axios.post("/auth/user/logout", {}, { withCredentials: true });
+    dispatch(adminSignOut());
+  };
+}
+
+export function getAllDepositeTransactions() {
+  return async (dispatch) => {
+    try {
+      await axios.get("/admin/get-user-deposite-request", { withCredentials: true })
+        .then(function (response) {
+          console.log('response get deposite request in slice',response.data);
+          dispatch(updateAllDepositeRequest({allDepositeRequest: response.data.data }));
+          dispatch(updateIsLoading({ isAdminLoading: false }));
+        })
+        .catch(function (error) {
+          console.log(error);
+          dispatch(updateIsLoading({ isAdminLoading: false }));
+        });
+    } catch (error) {
+      console.log(error);
+      dispatch(updateIsLoading({ isAdminLoading: false }));
+    }
+  };
+}
 
 export function getAllUser() {
   return async (dispatch) => {
@@ -227,3 +264,50 @@ export function fetchAllUserTransactions() {
       });
   }
 }
+
+// Redux action to dispatch the status change request
+// export const StatusUpdateDepositRequest = (transactionId, status) => async (dispatch) => {
+//   try {
+//     const response = await axios.patch(`/admin/approve-deposit/${transactionId}`, { status },{withCredentials:true});
+//     console.log('response in slice page',response.data);
+//     if (response.status === 200) {
+
+//       // dispatch({
+//       //   type: "UPDATE_TRANSACTION_STATUS", 
+//       //   payload: response.data.data, // Update the state with the new transaction data
+//       // });
+//       dispatch(showSnackbar({ severity: 'success', message: response.data.message }));
+//       // dispatch(updateAllDepositeRequest({allDepositeRequest: response.data.data }));
+//     }
+//   } catch (error) {
+//     dispatch(showSnackbar({ severity: 'error', message: error.message }));
+//   }
+// };
+
+export const StatusUpdateDepositRequest = (transactionId, status) => async (dispatch, getState) => {
+  try {
+    const response = await axios.patch(`/admin/approve-deposit/${transactionId}`, { status }, { withCredentials: true });
+    console.log('response in slice page', response.data);
+    
+    if (response.status === 200) {
+      dispatch(showSnackbar({ severity: 'success', message: response.data.message }));
+      
+      // Get the current state of allDepositeRequest
+      const { allDepositeRequest } = getState().admin;
+
+      // Update the specific transaction in the list
+      const updatedDepositeRequest = allDepositeRequest.map((transaction) =>
+        transaction.transactionId === transactionId
+          ? { ...transaction, status: response.data.data.status }
+          : transaction
+      );
+
+      // Dispatch to update the Redux state
+      dispatch(updateAllDepositeRequest({ allDepositeRequest: updatedDepositeRequest }));
+    }
+  } catch (error) {
+    dispatch(showSnackbar({ severity: 'error', message: error.message }));
+  }
+};
+
+

@@ -19,12 +19,14 @@ import {
 import {
   ArrowsLeftRight,
   CaretRight,
+  CaretUp,
   GearSix,
+  Shield,
   SignOut,
   UserCircleGear,
   X,
 } from "phosphor-react";
-import { Layout, Menu, theme, Button as AntDButton } from "antd";
+import { Layout, Menu, theme, Button as AntDButton, Drawer } from "antd";
 const { Header, Sider, Content } = Layout;
 import Logo from '../../../assets/logo.svg';
 import {
@@ -45,7 +47,8 @@ import {
 import Transfer from "../UserLayoutPage/Transfer";
 import More from "../UserLayoutPage/More";
 import { useDispatch, useSelector } from "react-redux";
-import { GetUserBankDetails, LogoutUser } from "../../../Redux/UserAuth/Auth";
+import { GetMyLofinDetailsTime, GetUserBankDetails, LogoutUser } from "../../../Redux/UserAuth/Auth";
+import moment from "moment";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -67,10 +70,12 @@ const AfterLoginLayout = () => {
   );
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
-
+  const [openSecondDialog, setOpenSecondDialog] = React.useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [showTransferPanel, setShowTransferPanel] = useState(false);
   const [showMorePanel, setShowMorePanel] = useState(false);
+  const [getLoginData,setLoginData] = useState(null);
   const location = useLocation();
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -119,7 +124,6 @@ const AfterLoginLayout = () => {
       label: "Profile",
       path: "/user/myprofile",
     },
-
   ];
   const selectedKey = menuItems.find((item) =>
     location.pathname.includes(item.path)
@@ -131,6 +135,13 @@ const AfterLoginLayout = () => {
 
   useEffect(() => {
     dispatch(GetUserBankDetails());
+    const fetchLoginDetails = async () => {
+      const data = await GetMyLofinDetailsTime();
+      if (data) {
+        setLoginData(data.data); // Assuming your response contains data under "data"
+      }
+    };
+    fetchLoginDetails();
   }, [dispatch]);
 
   useEffect(() => {
@@ -157,8 +168,19 @@ const AfterLoginLayout = () => {
     dispatch(LogoutUser());
   };
 
-  // console.log('userbankldetails in page',userBnakDetails);
+  // if(!getLoginData){
+  //   return (
+  //     <Typography>Still Not get any data...</Typography>
+  //   )
+  // }
 
+  console.log('login data in main layout page',getLoginData);
+
+  // console.log('userbankldetails in page',userBnakDetails);
+  const formatMyDate = (date) => {
+    if (!date) return "No data found";
+    return moment(date).format("MMM DD YYYY [at] hh:mm:ss A (GMT Z)"); // Example: Nov 11 2024 at 11:12:40 AM (GMT +5)
+  };
   return (
     <>
       {open && (
@@ -190,6 +212,7 @@ const AfterLoginLayout = () => {
       )}
 
       <Layout style={{ height: "100vh" }}>
+
         <Sider
           trigger={null}
           collapsible
@@ -212,6 +235,7 @@ const AfterLoginLayout = () => {
             </div>
           </div>
           <Menu
+          
             theme="dark"
             mode="inline"
             selectedKeys={[selectedKey || "dashboard"]}
@@ -245,18 +269,54 @@ const AfterLoginLayout = () => {
                   fontWeight: 600,
                   marginBottom: 15,
                 }}
+                onClick={item.onClick}
               >
-                {/* <Link to={item.path}>{item.label}</Link>{" "} */}
                 {userBnakDetails?.accountNumber ? (
                   <Link to={item.path}>{item.label}</Link> // Show link only if `accountNo` is present
                 ) : (
                   item.label // Display plain label if `accountNo` is missing
                 )}
-                {/* Wrap label with Link */}
               </Menu.Item>
             ))}
           </Menu>
+           <Box sx={{position:'absolute',bottom:0,padding:2}}>
+           {getLoginData ? (
+              <>
+              <Stack spacing={0.5}>
+              <Typography variant="caption">Your last Login was</Typography>
+                            <Typography variant="caption">{formatMyDate(getLoginData.lastLoginTime)}</Typography>
+                            <Typography variant="caption">Your last failed Login was:</Typography>
+                            <Typography variant="caption">{formatMyDate(getLoginData.lastFailedLoginTime)}</Typography>
+              </Stack>
+
+              </>
+
+) : (
+  <p>Loading login details...</p>
+)}
+           </Box>
         </Sider>
+        
+        {openSecondDialog && (
+        <Dialog
+          open={openSecondDialog}
+          keepMounted
+          onClose={handleClose}
+          aria-describedby="alert-dialog-slide-description"
+        >
+          <DialogTitle>Test Dialog</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-slide-description">
+              This is a second dialog, triggered by the "Test" menu item.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Close</Button>
+            {/* Add more actions here if necessary */}
+          </DialogActions>
+        </Dialog>
+      )}
+
         <Layout
           style={{
             backgroundColor: "#f5f5f5",
@@ -346,7 +406,82 @@ const AfterLoginLayout = () => {
           </Content>
         </Layout>
         {showMorePanel && (
-          <Box
+          <>
+                     <Box
+            onClick={() => setShowTransferPanel(false)}
+            sx={{
+              position: "fixed",
+              left: 300,
+              top: 0,
+              height: "100vh",
+              width: "90vw",
+              backgroundColor: "rgba(0, 0, 0, 0.3)", // Dark transparent backdrop
+              zIndex: 999, // Behind the Transfer Panel but above everything else
+            }}
+          >
+             <Stack sx={{width:'90%',marginTop:'10%'}} direction={'row'} spacing={2}>
+              <Stack sx={{width:'80%'}}>
+              <Box sx={{boxShadow:3,padding:3,backgroundColor:'#fff',position: "relative",overflow: "hidden",width:'100%'}}>
+                <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'}>
+                   <Typography variant="body2">Hello User,</Typography>
+
+                   <IconButton>
+                    <CaretUp />
+                   </IconButton>
+                   <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(100, 100, 100, 0.5)", // Dark transparent overlay
+          zIndex: 0, // Stays behind content
+        }}
+      />
+                </Stack>
+             </Box>
+             <Box sx={{paddingX:5}}> <Divider /> </Box>
+             <Box sx={{boxShadow:3,padding:3,backgroundColor:'#fff',position: "relative",overflow: "hidden",width:'100%'}}>
+                <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'} >
+                   <Typography variant="body2">Hello User,</Typography>
+
+                  <Stack direction={'row'} spacing={1} alignItems={'center'}>
+                    <Typography sx={{fontSize:'10px',fontWeight:500,paddingBottom:1}}>PHP</Typography>
+                    <Stack direction={'column'}>
+                      <Typography>2,345.00</Typography>
+                      <Typography sx={{fontSize:'10px',fontWeight:400}}>Available Balance</Typography>
+                    </Stack>
+                  </Stack>
+                </Stack>
+                <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(100, 100, 100, 0.5)", // Dark transparent overlay
+          zIndex: 0, // Stays behind content
+        }}
+      />
+             </Box>
+              </Stack>
+ <Stack sx={{paddingTop:5,padding:1,width:'20%',marginTop:3}}>
+  <Stack padding={3} marginTop={3} sx={{boxShadow:2,backgroundColor:'rgba(180,180,180,0.5)'}}>
+  <Shield size={30} />
+  <Typography variant="h6">Use Mobile Key on the new BPI app</Typography>
+
+  <Typography variant="caption" sx={{paddingRight:2}}>Authorize transaction here,in the new BPI app
+    by activating Mobile Key on the new BPI and instead of the older BPI app.
+  </Typography>
+  </Stack>
+ </Stack>
+            </Stack>
+
+            
+            </Box>
+           <Box
             sx={{
               position: "fixed",
               left: 300,
@@ -368,10 +503,87 @@ const AfterLoginLayout = () => {
             </Stack>
             <More setShowMorePanel={setShowMorePanel} />
           </Box>
+          </>
+         
         )}
 
         {showTransferPanel && (
-          <Box
+          <>
+           <Box
+            onClick={() => setShowTransferPanel(false)}
+            sx={{
+              position: "fixed",
+              left: 300,
+              top: 0,
+              height: "100vh",
+              width: "90vw",
+              backgroundColor: "rgba(0, 0, 0, 0.3)", // Dark transparent backdrop
+              zIndex: 999, // Behind the Transfer Panel but above everything else
+            }}
+          >
+             <Stack sx={{width:'90%',marginTop:'10%'}} direction={'row'} spacing={2}>
+              <Stack sx={{width:'80%'}}>
+              <Box sx={{boxShadow:3,padding:3,backgroundColor:'#fff',position: "relative",overflow: "hidden",width:'100%'}}>
+                <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'}>
+                   <Typography variant="body2">Hello User,</Typography>
+
+                   <IconButton>
+                    <CaretUp />
+                   </IconButton>
+                   <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(100, 100, 100, 0.5)", // Dark transparent overlay
+          zIndex: 0, // Stays behind content
+        }}
+      />
+                </Stack>
+             </Box>
+             <Box sx={{paddingX:5}}> <Divider /> </Box>
+             <Box sx={{boxShadow:3,padding:3,backgroundColor:'#fff',position: "relative",overflow: "hidden",width:'100%'}}>
+                <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'} >
+                   <Typography variant="body2">Hello User,</Typography>
+
+                  <Stack direction={'row'} spacing={1} alignItems={'center'}>
+                    <Typography sx={{fontSize:'10px',fontWeight:500,paddingBottom:1}}>PHP</Typography>
+                    <Stack direction={'column'}>
+                      <Typography>2,345.00</Typography>
+                      <Typography sx={{fontSize:'10px',fontWeight:400}}>Available Balance</Typography>
+                    </Stack>
+                  </Stack>
+                </Stack>
+                <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(100, 100, 100, 0.5)", // Dark transparent overlay
+          zIndex: 0, // Stays behind content
+        }}
+      />
+             </Box>
+              </Stack>
+ <Stack sx={{paddingTop:5,padding:1,width:'20%',marginTop:3}}>
+  <Stack padding={3} marginTop={3} sx={{boxShadow:2,backgroundColor:'rgba(180,180,180,0.5)'}}>
+  <Shield size={30} />
+  <Typography variant="h6">Use Mobile Key on the new BPI app</Typography>
+
+  <Typography variant="caption" sx={{paddingRight:2}}>Authorize transaction here,in the new BPI app
+    by activating Mobile Key on the new BPI and instead of the older BPI app.
+  </Typography>
+  </Stack>
+ </Stack>
+            </Stack>
+
+            
+            </Box>
+            <Box
             sx={{
               position: "fixed",
               left: 300,
@@ -393,7 +605,10 @@ const AfterLoginLayout = () => {
             </Stack>
             <Transfer setShowTransferPanel={setShowTransferPanel} />
           </Box>
+          </>
+
         )}
+       
       </Layout>
     </>
   );

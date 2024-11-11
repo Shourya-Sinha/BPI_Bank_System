@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { DescriptionOutlined, EmojiEmotions, SavingsOutlined } from "@mui/icons-material";
+import {
+  DescriptionOutlined,
+  EmojiEmotions,
+  SavingsOutlined,
+} from "@mui/icons-material";
 import {
   Box,
   IconButton,
@@ -17,6 +21,8 @@ import {
   Paper,
   TablePagination,
   styled,
+  TextField,
+  CircularProgress,
 } from "@mui/material";
 import {
   ArrowsLeftRight,
@@ -24,9 +30,14 @@ import {
   CaretDown,
   CaretUp,
   EyeSlash,
+  Shield,
 } from "phosphor-react";
 import { useDispatch, useSelector } from "react-redux";
-import { GetMyTransactionHistory } from "../../../Redux/UserAuth/Auth";
+import {
+  DepositeRequestAmount,
+  GetDepositeRequest,
+  GetMyTransactionHistory,
+} from "../../../Redux/UserAuth/Auth";
 
 const HiddenScrollbarContainer = styled("div")({
   overflow: "hidden", // Prevent scrolling
@@ -40,22 +51,23 @@ const columns = [
   { id: "txnid", label: "TXN-ID", minWidth: 170 },
   { id: "amount", label: "Amount", minWidth: 100 },
   {
-    id: "currency",
-    label: "Currency",
-  },
-  {
     id: "reciverid",
-    label: "Receiver ID",
-    align: "center",
-  },
-  {
-    id: "reciname",
-    label: "Receiver Name",
+    label: "My ID",
     align: "center",
   },
   {
     id: "txnstatus",
-    label: "TXN-Status",
+    label: "TXN-Approval Status",
+    align: "center",
+  },
+  {
+    id: "depositetype",
+    label: "TXN-Type",
+    align: "center",
+  },
+  {
+    id: "description",
+    label: "Descitption",
     align: "center",
   },
   {
@@ -68,13 +80,21 @@ const columns = [
 function createData(
   txnid,
   amount,
-  currency,
   reciverid,
-  reciname,
   txnstatus,
+  depositetype,
+  description,
   created
 ) {
-  return { txnid, amount, currency, reciverid, reciname, txnstatus, created };
+  return {
+    txnid,
+    amount,
+    reciverid,
+    txnstatus,
+    depositetype,
+    description,
+    created,
+  };
 }
 
 const getGreeting = () => {
@@ -98,10 +118,11 @@ const formatBalance = (balance) => {
 
 const MyAccount = () => {
   const dispatch = useDispatch();
-  const { myAllTransactions } = useSelector(
-    (state) => state.auth || { myAllTransactions: [] }
+  const { isLoading, myDepositeTransactions } = useSelector(
+    (state) => state.auth || { myDepositeTransactions: [] }
   );
   const [collapsed, setCollapsed] = useState(false);
+  const [collapsed1, setCollapsed1] = useState(false);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const { userBnakDetails } = useSelector(
@@ -117,10 +138,8 @@ const MyAccount = () => {
   };
 
   useEffect(() => {
-    dispatch(GetMyTransactionHistory());
+    dispatch(GetDepositeRequest());
   }, [dispatch]);
-
-  // console.log('my all transactions in page ',myAllTransactions);
 
   const formatDateTime = (timestamp) => {
     const date = new Date(timestamp);
@@ -135,22 +154,38 @@ const MyAccount = () => {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
 
-  const rows = (myAllTransactions?.homeBankTransactions || []).map((data) => {
+  const rows = (myDepositeTransactions || []).map((data) => {
     const row = createData(
       data?.transactionId ? data?.transactionId : "N/A",
       data?.amount ? data?.amount : "N/A",
-      data?.currency ? data?.currency : "N/A",
       data?.receiverUserId?._id ? data.receiverUserId?._id : "N/A",
-      `${data?.receiverUserId?.firstName || "N/A"} ${
-        data?.receiverUserId?.lastName || "N/A"
-      }`,
-      data?.status ? data.status : "N/A",
+      data?.status ? data?.status : "N/A",
+      data?.transactionType ? data.transactionType : "N/A",
+      data?.description ? data?.description : "N/A",
       formatDateTime(data?.timestamp) // Created date
     );
 
     // Return the row with the key
     return { ...row, key: data._id }; // Use a unique key for each row
   });
+
+  const [formValues, setFormValues] = useState({
+    amount: "",
+    accountNumber: userBnakDetails?.accountNumber,
+  });
+
+  const handleInputDeposite = (e) => {
+    const { name, value } = e.target;
+    setFormValues({ ...formValues, [name]: value });
+  };
+
+  const handleDeposite = (e) => {
+    e.preventDefault();
+    // console.log('formValues deposit',formValues);
+    dispatch(DepositeRequestAmount(formValues));
+  };
+
+  // console.log("my deposite transaction", myDepositeTransactions);
 
   return (
     <>
@@ -167,14 +202,14 @@ const MyAccount = () => {
             display: "flex",
             flexDirection: "row",
             borderRadius: 0.5,
-            maxWidth: "80%",
+            maxWidth: "100%",
             justifyContent: "space-between",
-            gap: 5,
+            gap: 2,
             overflowY: "scroll",
             maxHeight: "80vh",
           }}
         >
-          <Box sx={{ width: "100%" }}>
+          <Box sx={{ width: "80%" }}>
             <Box
               sx={{
                 display: "flex",
@@ -231,7 +266,12 @@ const MyAccount = () => {
                             ? userBnakDetails?.otherDeatils?.accountType
                             : "N/A"}
                         </Typography>
-                        <IconButton onClick={() => setCollapsed(!collapsed)}>
+                        <IconButton
+                          onClick={() => {
+                            setCollapsed((prev) => !prev); // Toggles the 'collapsed' state
+                            setCollapsed1((prev) => !prev); // Toggles the 'collapsed1' state
+                          }}
+                        >
                           <CaretDown />
                         </IconButton>
                       </Stack>
@@ -272,8 +312,8 @@ const MyAccount = () => {
 
               <Stack>
                 {/* Balance Information */}
-                {!collapsed && (
-                  <IconButton onClick={() => setCollapsed(!collapsed)}>
+                {!collapsed1 && (
+                  <IconButton onClick={() => setCollapsed1(!collapsed1)}>
                     <CaretUp />
                   </IconButton>
                 )}
@@ -469,64 +509,56 @@ const MyAccount = () => {
                   </Stack>
                 </Stack>
                 <Box sx={{ paddingTop: 2, paddingBottom: 2 }}>
-                  <Button
+                  {/* <Button
                     variant="contained"
                     sx={{ paddingX: 5, borderRadius: 0.5 }}
                   >
                     Apply
-                  </Button>
+                  </Button> */}
+                  <Typography variant="body2">
+                    Want to Add Money in Your Account?
+                  </Typography>
+                  <Stack direction={"row"} alignItems={"center"} spacing={2}>
+                    <TextField
+                      placeholder="Enter Amount"
+                      name="amount"
+                      value={formValues.amount}
+                      onChange={handleInputDeposite}
+                    />
+                    <TextField
+                      placeholder="Your Account Number"
+                      name="accountNumber"
+                      value={formValues.accountNumber}
+                      onChange={handleInputDeposite}
+                    />
+                    <Button
+                      onClick={handleDeposite}
+                      variant="contained"
+                      sx={{
+                        borderRadius: 0.5,
+                        paddingX: 4,
+                        paddingY: 2,
+                        color: "#fff",
+                        backgroundColor: "#b11116",
+                        "&:hover": {
+                          backgroundColor: "#fff",
+                          color: "#b11116",
+                          border: "1px solid #b11116",
+                        },
+                      }}
+                    >
+                      {isLoading ? (
+                        <CircularProgress size={24} />
+                      ) : (
+                        "SEND REQUEST"
+                      )}
+                    </Button>
+                  </Stack>
                 </Box>
 
                 <Box>
                   <Paper sx={{ width: "100%", overflow: "hidden" }}>
                     <TableContainer sx={{ maxHeight: 440 }}>
-                      {/* <Table stickyHeader aria-label="sticky table">
-                        <TableHead>
-                          <TableRow>
-                            {columns.map((column) => (
-                              <TableCell
-                                key={column.id}
-                                align={column.align}
-                                style={{ minWidth: column.minWidth }}
-                              >
-                                {column.label}
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {rows
-                            .slice(
-                              page * rowsPerPage,
-                              page * rowsPerPage + rowsPerPage
-                            )
-                            .map((row) => {
-                              return (
-                                <TableRow
-                                  hover
-                                  role="checkbox"
-                                  tabIndex={-1}
-                                  key={row.code}
-                                >
-                                  {columns.map((column) => {
-                                    const value = row[column.id];
-                                    return (
-                                      <TableCell
-                                        key={column.id}
-                                        align={column.align}
-                                      >
-                                        {column.format &&
-                                        typeof value === "number"
-                                          ? column.format(value)
-                                          : value}
-                                      </TableCell>
-                                    );
-                                  })}
-                                </TableRow>
-                              );
-                            })}
-                        </TableBody>
-                      </Table> */}
                       <Table stickyHeader aria-label="sticky table">
                         <TableHead>
                           <TableRow>
@@ -559,6 +591,7 @@ const MyAccount = () => {
                                     const value = row[column.id];
                                     return (
                                       <TableCell
+                                        sx={{ textTransform: "uppercase" }}
                                         key={column.id}
                                         align={column.align}
                                       >
@@ -577,10 +610,7 @@ const MyAccount = () => {
                                 colSpan={columns.length}
                                 align="center"
                               >
-                                <EmojiEmotions
-                                  color="error"
-                                  fontSize="large"
-                                />
+                                <EmojiEmotions color="error" fontSize="large" />
                                 <Typography
                                   variant="subtitle1"
                                   color="textSecondary"
@@ -607,61 +637,78 @@ const MyAccount = () => {
               </Box>
             </Collapse>
 
-            <Box
-              sx={{
-                boxShadow: 3,
-                backgroundColor: "#fff",
-                padding: "14px 22px",
-                marginTop: collapsed ? 2 : 0,
-                borderTop: collapsed ? " none " : "1px solid #ddd",
-                borderRadius: 0.5,
-              }}
-            >
-              <Stack
-                direction={"row"}
-                alignItems={"center"}
-                justifyContent={"space-between"}
+            <Collapse in={collapsed1} timeout="auto" unmountOnExit>
+              <Box
+                onClick={() => setCollapsed(!collapsed)}
+                sx={{
+                  boxShadow: 3,
+                  backgroundColor: "#fff",
+                  padding: "14px 22px",
+                  marginTop: collapsed ? 2 : 0,
+                  borderTop: collapsed ? " none " : "1px solid #ddd",
+                  borderRadius: 0.5,
+                  cursor: "pointer",
+                }}
               >
-                <Stack>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ textTransform: "uppercase" }}
-                  >
-                    {userBnakDetails?.otherDeatils?.accountType
-                      ? userBnakDetails?.otherDeatils?.accountType
-                      : "N/A"}
-                  </Typography>
-                  <Typography>
-                    {userBnakDetails?.accountNumber
-                      ? userBnakDetails?.accountNumber
-                      : "N/A"}
-                  </Typography>
-                </Stack>
-                <Stack>
-                  <Typography variant="body2" sx={{ letterSpacing: 1 }}>
-                    {" "}
-                    <p
-                      style={{
-                        display: "inline",
-                        fontSize: "11px",
-                        fontWeight: 500,
-                        paddingRight: 7,
-                      }}
+                <Stack
+                  direction={"row"}
+                  alignItems={"center"}
+                  justifyContent={"space-between"}
+                >
+                  <Stack>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ textTransform: "uppercase" }}
                     >
-                      PHP
-                    </p>
-                    {formatBalance(
-                      userBnakDetails?.otherDeatils?.balance
-                        ? userBnakDetails?.otherDeatils?.balance
-                        : "0.00"
-                    )}
-                  </Typography>
-                  <Typography sx={{ fontSize: "10px", fontWeight: 600 }}>
-                    Available balance
-                  </Typography>
+                      {userBnakDetails?.otherDeatils?.accountType
+                        ? userBnakDetails?.otherDeatils?.accountType
+                        : "N/A"}
+                    </Typography>
+                    <Typography>
+                      {userBnakDetails?.accountNumber
+                        ? userBnakDetails?.accountNumber
+                        : "N/A"}
+                    </Typography>
+                  </Stack>
+                  <Stack>
+                    <Typography variant="body2" sx={{ letterSpacing: 1 }}>
+                      {" "}
+                      <p
+                        style={{
+                          display: "inline",
+                          fontSize: "11px",
+                          fontWeight: 500,
+                          paddingRight: 7,
+                        }}
+                      >
+                        PHP
+                      </p>
+                      {formatBalance(
+                        userBnakDetails?.otherDeatils?.balance
+                          ? userBnakDetails?.otherDeatils?.balance
+                          : "0.00"
+                      )}
+                    </Typography>
+                    <Typography sx={{ fontSize: "10px", fontWeight: 600 }}>
+                      Available balance
+                    </Typography>
+                  </Stack>
                 </Stack>
-              </Stack>
-            </Box>
+              </Box>
+            </Collapse>
+          </Box>
+
+          <Box sx={{maxWidth:'20%',borderRadius:1}}>
+          <Stack sx={{paddingTop:1,padding:1,marginTop:1,borderRadius:1}}>
+  <Stack padding={3} marginTop={3} sx={{boxShadow:2,backgroundColor:'rgba(180,180,180,0.5)',borderRadius:1}}>
+  <Shield size={30} />
+  <Typography variant="h6">Use Mobile Key on the new BPI app</Typography>
+
+  <Typography variant="caption" sx={{paddingRight:2}}>Authorize transaction here,in the new BPI app
+    by activating Mobile Key on the new BPI and instead of the older BPI app.
+  </Typography>
+  </Stack>
+ </Stack>
           </Box>
         </HiddenScrollbarContainer>
       </Box>
