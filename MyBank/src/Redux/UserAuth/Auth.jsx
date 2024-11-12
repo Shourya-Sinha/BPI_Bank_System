@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "../../utils/axios";
+import { useEffect, useState } from "react";
 
 const initialState = {
   isLoggedIn: false,
@@ -615,3 +616,25 @@ export const GetMyLofinDetailsTime = async () => {
     return null; // Or throw error if you want to handle it elsewhere
   }
 };
+
+export function useIsSmallScreen(maxWidth = 600) {
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= maxWidth);
+
+  useEffect(() => {
+    const handleResize = () => {
+      console.log(window.innerWidth);
+      setIsSmallScreen(window.innerWidth <= maxWidth);
+    };
+
+    // Add event listener for window resize
+    window.addEventListener('resize', handleResize);
+
+    // Run the resize handler initially
+    handleResize();
+
+    // Clean up the event listener on component unmount
+    return () => window.removeEventListener('resize', handleResize);
+  }, [maxWidth]);
+
+  return isSmallScreen;
+}

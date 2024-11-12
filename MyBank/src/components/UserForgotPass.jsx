@@ -1,7 +1,7 @@
 import { Box, Button, Container, Link, Stack, TextField, Typography } from '@mui/material'
 import { CaretRight } from 'phosphor-react'
 import React from 'react'
-
+import {Link as RouterLink} from 'react-router-dom';
 const UserForgotPass = () => {
   return (
     <>
@@ -13,7 +13,7 @@ const UserForgotPass = () => {
             </Stack>
 
             <Stack direction={'row'} alignItems={'center'} spacing={2}>
-                <Typography variant='body2'>Home</Typography>
+                <Typography variant='body2' component={RouterLink} to={'/app'}>Home</Typography>
                 <Typography variant='body2'>Contact Us</Typography>
                 <Typography variant='body2'>Privacy Policy</Typography>
             </Stack>
@@ -81,8 +81,11 @@ const UserForgotPass = () => {
                   }}
                 />
 
-                <Stack direction={'row'} sx={{justifyContent:'flex-end'}}>
-                    <Button variant='contained' sx={{paddingX:5,borderRadius:0.5}}>SEND REQUEST</Button>
+                <Stack direction={'row'} justifyContent={'space-between'}>
+                  <Typography component={RouterLink} to={'/login'}>Go back to Login</Typography>
+                  <Stack sx={{justifyContent:'flex-end'}}>
+                  <Button variant='contained' sx={{paddingX:5,borderRadius:0.5}}>SEND REQUEST</Button>
+                  </Stack>
                 </Stack>
                 </Stack>
                 </Box>

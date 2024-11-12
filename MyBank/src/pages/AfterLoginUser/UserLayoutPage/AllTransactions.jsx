@@ -1,6 +1,9 @@
 import {
   Box,
+  Collapse,
+  IconButton,
   Paper,
+  Stack,
   styled,
   Table,
   TableBody,
@@ -10,10 +13,14 @@ import {
   TablePagination,
   TableRow,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GetMyTransactionHistory } from "../../../Redux/UserAuth/Auth";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, CaretDown, CaretUp } from "phosphor-react";
 
 const HiddenScrollbarContainer = styled("div")({
   overflow: "hidden", // Prevent scrolling
@@ -198,11 +205,45 @@ const formatDateTime = (timestamp) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
+const formatDate = (date) => {
+  // Ensure the input is a valid Date object or string
+  if (!date) return "N/A";
+
+  const months = [
+    "JAN",
+    "FEB",
+    "MAR",
+    "APR",
+    "MAY",
+    "JUN",
+    "JUL",
+    "AUG",
+    "SEP",
+    "OCT",
+    "NOV",
+    "DEC",
+  ];
+
+  // Create a new Date object from the input date (if it's a string or number)
+  const d = new Date(date);
+
+  // Get the month and date
+  const month = months[d.getMonth()]; // Get the month from the Date object (0-based index)
+  const day = d.getDate(); // Get the day of the month
+
+  return `${month} ${day}`; // Return the formatted date like "NOV 11"
+};
 
 const AllTransactions = () => {
+  const navigate = useNavigate();
+  const Muitheme = useTheme();
+  const isSmallScreen = useMediaQuery(Muitheme.breakpoints.down("sm"));
   const dispatch = useDispatch();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [collapse, setCollapse] = useState(false);
+  const [collapse1, setCollapse1] = useState(false);
+
   const { myAllTransactions } = useSelector(
     (state) => state.auth || { myAllTransactions: [] }
   );
@@ -266,34 +307,329 @@ const AllTransactions = () => {
     return { ...row, key: data._id }; // Use a unique key for each row
   });
 
-  const hasTransactions =
-    rows.length > 0 || rows1.length > 0;
+  const hasTransactions = rows.length > 0 || rows1.length > 0;
+  const hasMobTransaction =
+    myAllTransactions?.homeBankTransactions?.length > 0 ||
+    myAllTransactions?.anotherBankTransactions.length > 0;
+
   return (
     <>
-      <HiddenScrollbarContainer
-        sx={{ overflowY: "scroll", width: "100%", height: "100%" }}
-      >
-        <Typography variant="h5">All Home Bank Transactions</Typography>
+      {isSmallScreen ? (
+        <Box sx={{ width: "100%", paddingX: 2, paddingTop: 2 }}>
+          <Stack
+            direction={"row"}
+            alignItems={"center"}
+            spacing={3}
+            sx={{ position: "sticky" }}
+          >
+            <IconButton onClick={() => navigate("/user/mainacc")}>
+              <ArrowLeft />
+            </IconButton>
+            <Typography variant="h5">All Home Bank Transactions</Typography>
+          </Stack>
+          <Stack
+            direction={"row"}
+            alignItems={"center"}
+            justifyContent={"space-between"}
+            sx={{ marginTop: 2, px: 2 }}
+          >
+            <Typography variant="h6">
+              {collapse ? "Hide Details" : "Show Home Bank Details"}
+            </Typography>
+            <IconButton onClick={() => setCollapse((prev) => !prev)}>
+              {collapse ? <CaretDown /> : <CaretUp />}
+            </IconButton>
+          </Stack>
+          <HiddenScrollbarContainer
+            sx={{ overflowY: "scroll", width: "100%", maxHeight: "80vh" }}
+          >
+            <Box sx={{ marginTop: 3 }}>
+              <Paper
+                sx={{ width: "100%", overflow: "hidden", marginBottom: 5 }}
+              >
+                <Collapse in={collapse}>
+                  {hasMobTransaction ? (
+                    myAllTransactions?.homeBankTransactions.map(
+                      (transaction) => (
+                        <Box
+                          sx={{ boxShadow: 3, paddingBottom: 1 }}
+                          key={transaction.key}
+                        >
+                          <Box
+                            sx={{
+                              backgroundColor: "#eeeeee",
+                              padding: 1,
+                              display: "flex",
+                              flexDirection: "row",
+                              justifyContent: "space-between",
+                            }}
+                          >
+                            <Typography variant="subtitle2">
+                              {formatDate(transaction.timestamp) || "N/A"}
+                            </Typography>
+                            <Typography variant="caption">
+                              {transaction.transactionId || "N/A"}
+                            </Typography>
+                          </Box>
+                          <Stack
+                            sx={{ padding: 2, backgroundColor: "#f5f5f5" }}
+                          >
+                            <Stack
+                              direction={"row"}
+                              justifyContent={"space-between"}
+                              alignItems={"center"}
+                            >
+                              <Stack>
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    paddingY: 1,
+                                    textTransform: "capitalize",
+                                  }}
+                                >
+                                  TXN Type :{" "}
+                                  {transaction.transactionType || "N/A"}
+                                </Typography>
+                                <Typography variant="subtitle2">
+                                  TO:{" "}
+                                  {transaction.receiverBankAccountNumber ||
+                                    "N/A"}
+                                </Typography>
+                              </Stack>
+                              <Stack>
+                                <Typography variant="subtitle2">
+                                  FROM:{" "}
+                                  {transaction.senderBankAccountNumber || "N/A"}
+                                </Typography>
+                                <Typography variant="caption">
+                                  Receiver name:{" "}
+                                  {`${
+                                    transaction.receiverUserId?.firstName ||
+                                    "N/A"
+                                  } ${
+                                    transaction.receiverUserId?.lastName ||
+                                    "N/A"
+                                  }`}
+                                </Typography>
+                              </Stack>
+                            </Stack>
 
-        <Box sx={{ marginTop: 3 }}>
-          <Paper sx={{ width: "100%", overflow: "hidden", marginBottom: 5 }}>
-            <TableContainer sx={{ maxHeight: 440 }}>
-              <Table stickyHeader aria-label="sticky table">
-                <TableHead>
-                  <TableRow>
-                    {columns.map((column) => (
-                      <TableCell
-                        key={column.id}
-                        align={column.align}
-                        style={{ minWidth: column.minWidth }}
-                      >
-                        {column.label}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {/* {rows
+                            <Stack
+                              direction={"row"}
+                              justifyContent={"space-between"}
+                              alignItems={"center"}
+                            >
+                              <Typography
+                                variant="caption"
+                                sx={{ paddingY: 1 }}
+                              >
+                                Amount
+                              </Typography>
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ paddingY: 1 }}
+                              >
+                                -PHP {transaction.amount || "N/A"}
+                              </Typography>
+                            </Stack>
+                            <Stack
+                              direction={"row"}
+                              alignItems={"center"}
+                              justifyContent={"center"}
+                            >
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color:
+                                    transaction.status === "completed"
+                                      ? "green"
+                                      : "red",
+                                }}
+                              >
+                                {transaction.status}
+                              </Typography>
+                            </Stack>
+                          </Stack>
+                        </Box>
+                      )
+                    )
+                  ) : (
+                    <Typography variant="body2">
+                      No transactions found.
+                    </Typography> // Fallback if no data
+                  )}
+                </Collapse>
+              </Paper>
+            </Box>
+
+            <Typography variant="h5" sx={{ paddingLeft: 2 }}>
+              All Another Bank Transactions
+            </Typography>
+            <Stack
+              direction={"row"}
+              alignItems={"center"}
+              justifyContent={"space-between"}
+              sx={{ marginTop: 2, px: 2 }}
+            >
+              <Typography variant="subtitle2">
+                {collapse1 ? "Hide Details" : "Show Another Bank Details"}
+              </Typography>
+              <IconButton onClick={() => setCollapse1((prev) => !prev)}>
+                {collapse1 ? <CaretDown /> : <CaretUp />}
+              </IconButton>
+            </Stack>
+            <Box sx={{ marginTop: 3, paddingTop: 5 }}>
+              <Paper
+                sx={{ width: "100%", overflow: "hidden", marginBottom: 5 }}
+              >
+                <Collapse in={collapse1}>
+                  {hasMobTransaction ? (
+                    myAllTransactions?.anotherBankTransactions?.map(
+                      (transaction) => (
+                        <Box
+                          sx={{ boxShadow: 3, paddingBottom: 1 }}
+                          key={transaction.key}
+                        >
+                          <Box
+                            sx={{
+                              backgroundColor: "#eeeeee",
+                              padding: 1,
+                              display: "flex",
+                              flexDirection: "row",
+                              justifyContent: "space-between",
+                            }}
+                          >
+                            <Typography variant="subtitle2">
+                              {formatDate(transaction.timestamp) || "N/A"}
+                            </Typography>
+                            <Typography variant="caption">
+                              {transaction.transactionId || "N/A"}
+                            </Typography>
+                          </Box>
+                          <Stack
+                            sx={{ padding: 2, backgroundColor: "#f5f5f5" }}
+                          >
+                            <Stack
+                              direction={"row"}
+                              justifyContent={"space-between"}
+                              alignItems={"center"}
+                            >
+                              <Stack>
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    paddingY: 1,
+                                    textTransform: "capitalize",
+                                  }}
+                                >
+                                  TXN Type :{" "}
+                                  {transaction.transactionType || "N/A"}
+                                </Typography>
+                                <Typography variant="subtitle2">
+                                  TO:{" "}
+                                  {transaction.receiverAccountNumber || "N/A"}
+                                </Typography>
+                              </Stack>
+                              <Stack>
+                                <Typography variant="subtitle2">
+                                  FROM:{" "}
+                                  {transaction.senderAccountNumber || "N/A"}
+                                </Typography>
+                                <Typography variant="caption">
+                                  Receiver name:{" "}
+                                  {`${
+                                    transaction.anotherBankDetails
+                                      ?.accountHolderName || "N/A"
+                                  }`}
+                                </Typography>
+                              </Stack>
+                            </Stack>
+
+                            <Stack
+                              direction={"row"}
+                              justifyContent={"space-between"}
+                              alignItems={"center"}
+                            >
+                              <Typography
+                                variant="caption"
+                                sx={{ paddingY: 1 }}
+                              >
+                                Amount
+                              </Typography>
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ paddingY: 1 }}
+                              >
+                                -PHP {transaction.amount || "N/A"}
+                              </Typography>
+                            </Stack>
+                            <Stack
+                              direction={"row"}
+                              alignItems={"center"}
+                              justifyContent={"center"}
+                            >
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color:
+                                    transaction.status === "completed"
+                                      ? "green"
+                                      : "red",
+                                  textTransform: "capitalize",
+                                }}
+                              >
+                                {transaction.status}
+                              </Typography>
+                            </Stack>
+                          </Stack>
+                        </Box>
+                      )
+                    )
+                  ) : (
+                    <Typography variant="body2">
+                      No transactions found.
+                    </Typography> // Fallback if no data
+                  )}
+                </Collapse>
+              </Paper>
+            </Box>
+            <Stack
+              direction={"column"}
+              alignItems={"center"}
+              justifyContent={"center"}
+            >
+              <Typography sx={{ fontSize: "60px" }}>🔒</Typography>
+              <Typography variant="subtitle2">
+                😆Happy and Safe Banking With Us
+              </Typography>
+            </Stack>
+          </HiddenScrollbarContainer>
+        </Box>
+      ) : (
+        <HiddenScrollbarContainer
+          sx={{ overflowY: "scroll", width: "100%", height: "100%" }}
+        >
+          <Typography variant="h5">All Home Bank Transactions</Typography>
+
+          <Box sx={{ marginTop: 3 }}>
+            <Paper sx={{ width: "100%", overflow: "hidden", marginBottom: 5 }}>
+              <TableContainer sx={{ maxHeight: 440 }}>
+                <Table stickyHeader aria-label="sticky table">
+                  <TableHead>
+                    <TableRow>
+                      {columns.map((column) => (
+                        <TableCell
+                          key={column.id}
+                          align={column.align}
+                          style={{ minWidth: column.minWidth }}
+                        >
+                          {column.label}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {/* {rows
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row) => {
                       return (
@@ -320,79 +656,82 @@ const AllTransactions = () => {
                         </TableRow>
                       );
                     })} */}
-                     {hasTransactions ? (
-                    rows
-                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                      .map((row) => {
-                        return (
-                          <TableRow
-                            hover
-                            role="checkbox"
-                            tabIndex={-1}
-                            key={row.key}
-                          >
-                            {columns.map((column) => {
-                              const value = row[column.id];
-                              return (
-                                <TableCell
-                                  key={column.id}
-                                  align={column.align}
-                                  sx={{ fontSize: 12 }}
-                                >
-                                  {column.format && typeof value === "number"
-                                    ? column.format(value)
-                                    : value}
-                                </TableCell>
-                              );
-                            })}
-                          </TableRow>
-                        );
-                      })
-                  ) : (
+                    {hasTransactions ? (
+                      rows
+                        .slice(
+                          page * rowsPerPage,
+                          page * rowsPerPage + rowsPerPage
+                        )
+                        .map((row) => {
+                          return (
+                            <TableRow
+                              hover
+                              role="checkbox"
+                              tabIndex={-1}
+                              key={row.key}
+                            >
+                              {columns.map((column) => {
+                                const value = row[column.id];
+                                return (
+                                  <TableCell
+                                    key={column.id}
+                                    align={column.align}
+                                    sx={{ fontSize: 12 }}
+                                  >
+                                    {column.format && typeof value === "number"
+                                      ? column.format(value)
+                                      : value}
+                                  </TableCell>
+                                );
+                              })}
+                            </TableRow>
+                          );
+                        })
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={columns.length} align="center">
+                          <Typography variant="h6" color="textSecondary">
+                            😢 No Data Available
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <TablePagination
+                rowsPerPageOptions={[10, 25, 100]}
+                component="div"
+                count={rows.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </Paper>
+          </Box>
+
+          <Typography variant="h5">All Another Bank Transactions</Typography>
+
+          <Box sx={{ marginTop: 3, paddingTop: 5 }}>
+            <Paper sx={{ width: "100%", overflow: "hidden", marginBottom: 5 }}>
+              <TableContainer sx={{ maxHeight: 440 }}>
+                <Table stickyHeader aria-label="sticky table">
+                  <TableHead>
                     <TableRow>
-                      <TableCell colSpan={columns.length} align="center">
-                        <Typography variant="h6" color="textSecondary">
-                          😢 No Data Available
-                        </Typography>
-                      </TableCell>
+                      {columns1.map((column) => (
+                        <TableCell
+                          key={column.id}
+                          align={column.align}
+                          style={{ minWidth: column.minWidth }}
+                        >
+                          {column.label}
+                        </TableCell>
+                      ))}
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <TablePagination
-              rowsPerPageOptions={[10, 25, 100]}
-              component="div"
-              count={rows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </Paper>
-        </Box>
-
-        <Typography variant="h5">All Another Bank Transactions</Typography>
-
-        <Box sx={{ marginTop: 3, paddingTop: 5 }}>
-          <Paper sx={{ width: "100%", overflow: "hidden", marginBottom: 5 }}>
-            <TableContainer sx={{ maxHeight: 440 }}>
-              <Table stickyHeader aria-label="sticky table">
-                <TableHead>
-                  <TableRow>
-                    {columns1.map((column) => (
-                      <TableCell
-                        key={column.id}
-                        align={column.align}
-                        style={{ minWidth: column.minWidth }}
-                      >
-                        {column.label}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {/* {rows1
+                  </TableHead>
+                  <TableBody>
+                    {/* {rows1
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row) => {
                       return (
@@ -419,58 +758,62 @@ const AllTransactions = () => {
                         </TableRow>
                       );
                     })} */}
-                     {hasTransactions ? (
-                    rows1
-                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                      .map((row) => {
-                        return (
-                          <TableRow
-                            hover
-                            role="checkbox"
-                            tabIndex={-1}
-                            key={row.key}
-                          >
-                            {columns1.map((column) => {
-                              const value = row[column.id];
-                              return (
-                                <TableCell
-                                  key={column.id}
-                                  align={column.align}
-                                  sx={{ fontSize: 12 }}
-                                >
-                                  {column.format && typeof value === "number"
-                                    ? column.format(value)
-                                    : value}
-                                </TableCell>
-                              );
-                            })}
-                          </TableRow>
-                        );
-                      })
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={columns1.length} align="center">
-                        <Typography variant="h6" color="textSecondary">
-                          😢 No Data Available
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <TablePagination
-              rowsPerPageOptions={[10, 25, 100]}
-              component="div"
-              count={rows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </Paper>
-        </Box>
-      </HiddenScrollbarContainer>
+                    {hasTransactions ? (
+                      rows1
+                        .slice(
+                          page * rowsPerPage,
+                          page * rowsPerPage + rowsPerPage
+                        )
+                        .map((row) => {
+                          return (
+                            <TableRow
+                              hover
+                              role="checkbox"
+                              tabIndex={-1}
+                              key={row.key}
+                            >
+                              {columns1.map((column) => {
+                                const value = row[column.id];
+                                return (
+                                  <TableCell
+                                    key={column.id}
+                                    align={column.align}
+                                    sx={{ fontSize: 12 }}
+                                  >
+                                    {column.format && typeof value === "number"
+                                      ? column.format(value)
+                                      : value}
+                                  </TableCell>
+                                );
+                              })}
+                            </TableRow>
+                          );
+                        })
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={columns1.length} align="center">
+                          <Typography variant="h6" color="textSecondary">
+                            😢 No Data Available
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <TablePagination
+                rowsPerPageOptions={[10, 25, 100]}
+                component="div"
+                count={rows.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </Paper>
+          </Box>
+        </HiddenScrollbarContainer>
+      )}
     </>
   );
 };

@@ -27,6 +27,8 @@ import {
   styled,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { CaretRight, SignOut, X } from "phosphor-react";
 import { Link, Navigate } from "react-router-dom";
@@ -42,6 +44,7 @@ const HiddenScrollbarContainer = styled("div")({
 });
 
 const FirstEffectDialog = ({ open, onClose }) => {
+
   const handleUnderstandClick = () => {
     // Handle the logic when the user clicks "I Understand"
     console.log("User understood the message");
@@ -121,6 +124,8 @@ const FirstEffectDialog = ({ open, onClose }) => {
 const steps = ["Enroll", "Nominate", "Verify"];
 
 const Register = () => {
+  const Muitheme = useTheme();
+  const isSmallScreen = useMediaQuery(Muitheme.breakpoints.down('sm'));
   const {isLoggedIn,isLoading} = useSelector((state)=>state.auth );
   const {userBnakDetails} = useSelector((state)=>state.auth || {userBnakDetails:{}});
   const { accountCreation } = useSelector((state) => state.auth || { accountCreation: { step: null, status: null } }); 
@@ -448,12 +453,14 @@ if (
                     <Stack direction={"row"} spacing={2}>
                       <TextField
                         fullWidth
+                        required
                         label="Name"
                         name="name"
                         value={formData1.name}
                         onChange={handleInputChange}
                       />
                       <TextField
+                      required
                         fullWidth
                         label="Email"
                         name="email"
@@ -463,6 +470,7 @@ if (
                     </Stack>
                     <Stack direction={"row"} spacing={2}>
                       <TextField
+                      required
                         label="Phone Number"
                         name="phoneNo"
                         value={formData1.phoneNo}
@@ -487,6 +495,7 @@ if (
                     </Stack>
 
                     <TextField
+                    required
                       fullWidth
                       label="Gender"
                       name="gender"
@@ -498,6 +507,7 @@ if (
 
                     <Stack direction={"row"} spacing={2}>
                       <TextField
+                      required
                         fullWidth
                         label="Village"
                         name="vill"
@@ -505,6 +515,7 @@ if (
                         onChange={handleInputChange}
                       />
                       <TextField
+                      required
                         fullWidth
                         label="Full address"
                         name="fulladdress"
@@ -514,6 +525,7 @@ if (
                     </Stack>
                     <Stack direction={"row"} spacing={2}>
                       <TextField
+                      required
                         fullWidth
                         label="State"
                         name="state"
@@ -521,6 +533,7 @@ if (
                         onChange={handleInputChange}
                       />
                       <TextField
+                      required
                         fullWidth
                         label="City"
                         name="city"
@@ -530,6 +543,7 @@ if (
                     </Stack>
                     <Stack direction={"row"} spacing={2}>
                       <TextField
+                      required
                         fullWidth
                         label="Pincode"
                         name="pincode"
@@ -537,6 +551,7 @@ if (
                         onChange={handleInputChange}
                       />
                       <TextField
+                      required
                         fullWidth
                         label="Country"
                         name="country"
@@ -546,6 +561,7 @@ if (
                     </Stack>
                     <Stack direction={"row"} spacing={2}>
                       <TextField
+                      required
                         fullWidth
                         label="NearBy"
                         name="nearBy"
@@ -553,6 +569,7 @@ if (
                         onChange={handleInputChange}
                       />
                       <TextField
+                      required
                         fullWidth
                         label="Residential Status (Parental or Owned)"
                         name="residentialStatus"
@@ -562,6 +579,7 @@ if (
                     </Stack>
                     <Stack direction={"row"} spacing={2}>
                       <TextField
+                      required
                         fullWidth
                         label="Occupation"
                         name="occupation"
@@ -569,6 +587,7 @@ if (
                         onChange={handleInputChange}
                       />
                       <TextField
+                      required
                         fullWidth
                         label="Annual Income"
                         name="annualIncome"
@@ -605,6 +624,7 @@ if (
                   </FormControl>
                   <TextField
                     fullWidth
+                    sx={{ display: 'none' }}
                     label="Initial Deposit"
                     name="initialDeposit"
                     value={formData2.initialDeposit}
@@ -637,7 +657,7 @@ if (
                       <MenuItem value="Income Proof">Income Proof</MenuItem>
                     </Select>
                   </FormControl>
-                  <input type="file" onChange={handleFileChange3} />
+                  <input type="file" accept=".pdf" onChange={handleFileChange3} />
                   <Button variant="contained" onClick={handleSubmitData3}>
                   {isLoading ? <CircularProgress /> :"SUBMIT STEP 3"}
                   </Button>

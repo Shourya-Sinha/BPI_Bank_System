@@ -52,7 +52,12 @@ export default function Router() {
         { path: "transfer",  },
         { path: "payload", element: <Payload /> },
         { path: "invest", element: <Invest /> },
+        { path: "settingMob", element: <SettingMob /> },
         { path: "more",  },
+        { path: "moremob", element:<MoreMob /> },
+        { path: "payloadmob", element:<PayloadMob /> },
+        { path: "investmob", element:<InvestMob /> },
+        { path: "transfermob", element:<TransferMob /> },
         { path: "ownacc", element: <OwnAccount /> },
         { path: "anotherbank", element: <AnotherBank /> },
         { path: "anotherbpi", element: <AnotherBPI /> },
@@ -92,6 +97,21 @@ const Invest = Loadable(
 );
 const More = Loadable(
   lazy(() => import("../pages/AfterLoginUser/UserLayoutPage/More.jsx"))
+);
+const MoreMob = Loadable(
+  lazy(() => import("../pages/AfterLoginUser/UserLayoutPage/MoreMob.jsx"))
+);
+const PayloadMob = Loadable(
+  lazy(() => import("../pages/AfterLoginUser/UserLayoutPage/PayloadMob.jsx"))
+);
+const InvestMob = Loadable(
+  lazy(() => import("../pages/AfterLoginUser/UserLayoutPage/InvestMore.jsx"))
+);
+const TransferMob = Loadable(
+  lazy(() => import("../pages/AfterLoginUser/UserLayoutPage/TransferMob.jsx"))
+);
+const SettingMob = Loadable(
+  lazy(() => import("../pages/AfterLoginUser/UserLayoutPage/SettingsMobile.jsx"))
 );
 
 

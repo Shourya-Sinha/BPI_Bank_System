@@ -1,6 +1,6 @@
 import React from "react";
 import Slider from "react-slick";
-import { Box, Stack, Typography, Button } from "@mui/material";
+import { Box, Stack, Typography, Button, useTheme, useMediaQuery } from "@mui/material";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Link } from "react-router-dom";
@@ -27,6 +27,10 @@ const Images_labels = [
 ];
 
 const SLiderView = () => {
+  const theme = useTheme();
+  const isMediumScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const isLargeScreen = useMediaQuery(theme.breakpoints.down('lg'));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const settings = {
         dots: true,
         infinite: true,
@@ -41,7 +45,7 @@ const SLiderView = () => {
       };
   return (
     <>
- <Box sx={{ position: "relative", width: "100%", overflow: "hidden" ,clipPath: "polygon(0 87%, 100% 98%, 100% 0, 0% 0)"}}>
+ {/* <Box sx={{ position: "relative", width: "100%", overflow: "hidden" ,clipPath: "polygon(0 87%, 100% 98%, 100% 0, 0% 0)"}}>
       <Slider {...settings}>
         {Images_labels.map((item) => (
           <Box key={item.id} sx={{ position: "relative", }}>
@@ -101,12 +105,87 @@ const SLiderView = () => {
       <style>
         {`
           .slick-prev:before, .slick-next:before {
-            content: ''; /* remove default icons */
-            font-size: 0; /* remove any size conflicts */
+            content: ''; 
+            font-size: 0;
           }
-        `}
+       `}
       </style>
-    </Box>
+    </Box> */}
+
+
+    <Box sx={{ position: "relative", width: "100%", overflow: "hidden" ,clipPath: "polygon(0 87%, 100% 98%, 100% 0, 0% 0)"}}>
+    <Slider {...settings}>
+      {Images_labels.map((item) => (
+        <Box key={item.id} sx={{ position: "relative", }}>
+          <img
+            src={item.img}
+            alt={item.label}
+            style={{ width: "100%", display: "block", borderRadius: "0px 0px 100px 0px", }}
+          />
+          <Stack
+            sx={{
+              position: "absolute",
+              right:isMediumScreen ? '5%' : "18%",
+              top: "42%",
+              transform: "translateY(-50%)",
+              textAlign: "left", // Change to left to align text
+              width: isMediumScreen ? "58%" :"50%", // Fixed width for labels
+              maxWidth: isMediumScreen ? '350px' :"740px", // Optional: limit max width
+              maxWidth: isSmallScreen ? '190px' :"340px", 
+              maxWidth: isLargeScreen ? '190px' :"340px", 
+              whiteSpace: "normal", // Allow wrapping
+              overflow: "hidden", // Hide overflow
+              textOverflow: "ellipsis", // Ellipsis for overflow text
+            }}
+          >
+            <Typography
+              variant="body1"
+              sx={{
+                color: "#fff",
+                // padding: "8px",
+                paddingX:isMediumScreen ? '2px' : '8px',
+                paddingY:isMediumScreen ? '2px' : '8px',
+                borderRadius: "4px",
+                fontSize: isMediumScreen ? '14px' : "39px", // Reduced font size for better wrapping
+                fontSize: isLargeScreen ? '12px' : "39px", // Reduced font size for better wrapping
+                lineHeight: isMediumScreen ? '14px' : "39px",
+              }}
+            >
+              {item.label}
+            </Typography>
+            <Box display={"flex"} justifyContent={"flex-start"} sx={{ marginTop: 2 }}>
+              <Button
+              component={Link}
+              to='/maintain'
+                variant="contained"
+                sx={{
+                  backgroundColor: "#fff",
+                  color: "#b11116",
+                  borderRadius: "4px",
+                  fontSize: isMediumScreen ? "9px" : "16px",
+                  fontSize: isLargeScreen ? "8px" : "16px",
+                  lineHeight: "20px",
+                  padding:isMediumScreen ? '5px' : "12px",
+                  padding:isLargeScreen ? '3px' : "10px",
+                }}
+                endIcon={<ArrowRight style={{fontSize:isMediumScreen ? '10px' : ""}} />}
+              >
+                LEARN MORE
+              </Button>
+            </Box>
+          </Stack>
+        </Box>
+      ))}
+    </Slider>
+    <style>
+      {`
+        .slick-prev:before, .slick-next:before {
+          content: ''; /* remove default icons */
+          font-size: 0; /* remove any size conflicts */
+        }
+      `}
+    </style>
+  </Box>
     </>
   );
 };

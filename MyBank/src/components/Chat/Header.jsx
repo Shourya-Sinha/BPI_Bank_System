@@ -9,6 +9,7 @@ import {
   Stack,
   styled,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Check, CodeSimple } from "phosphor-react";
@@ -329,7 +330,8 @@ const ChatHeader = () => {
   const isMobile = useResponsive("between", "md", "xs", "sm");
   const [searchParams, setSearchParams] = useSearchParams();
   const theme = useTheme();
-
+  const isMediumScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const handleCloseConversationMenu = () => {
     setConversationMenuAnchorEl(null);
   };
@@ -348,7 +350,8 @@ const ChatHeader = () => {
   };
 
   return (
-    <Box
+    <>
+        {/* <Box
       p={2}
       width={"100%"}
       sx={{
@@ -421,7 +424,86 @@ const ChatHeader = () => {
       >
         <Popper_Menu />
       </Popper>
+    </Box> */}
+        <Box
+      width={"100%"}
+      sx={{
+        borderBottom: "1px solid #ddd",
+        paddingX:isSmallScreen ? '5px' : '50px',
+        paddingY:isSmallScreen ? '5px' : '16px'
+      }}
+    >
+      <Stack
+        alignItems={"center"}
+        direction={"row"}
+        sx={{ width: "100%", height: "100%" }}
+        justifyContent="space-between"
+      >
+        <Stack
+          onClick={() => {
+            searchParams.set("open", true);
+            setSearchParams(searchParams);
+          }}
+          spacing={2}
+          direction="row"
+        >
+          <Stack direction={"row"} spacing={2}>
+            <Typography sx={{ fontSize: "16px",display:isSmallScreen ? 'none':'block' }}>You are in</Typography>
+            <Typography
+              variant="body2"
+              sx={{ color: "#1A1A1A",fontSize: isMediumScreen ? "0.8rem":"17px" }}
+            >
+              Personal Banking
+            </Typography>
+          </Stack>
+          <IconButton sx={{ padding: 0 }} onClick={handleClickPopper}>
+            <Box sx={{ transform: "rotate(90deg)", color: "#b11116" }}>
+              <CodeSimple style={{fontSize: isMediumScreen ? "0.9rem":""}} />
+            </Box>
+          </IconButton>
+        </Stack>
+        <Stack direction={"row"} alignItems="center" spacing={isMobile ? 1 : 3}>
+          {Conversation_Menu.map((conv, index) => (
+            <Typography
+              variant="caption"
+              key={index}
+              component={Link}
+              to={"/maintain"}
+              sx={{ textDecoration: "none", color: "#1A1A1A",display: isMediumScreen ? 'none' : 'block', }}
+            >
+              {conv.title}{" "}
+            </Typography>
+          ))}
+
+          <Button
+            component={Link}
+            to="/login"
+            sx={{
+              textDecoration: "none",
+              // padding: "9px 16px",
+              paddingX:isMediumScreen ? '10px' : '16px',
+              paddingY:isMediumScreen ? '3px' :'9px',
+              fontSize:isMediumScreen ?  '10px' : "13px",
+              color: "#fff",
+              borderRadius: "4px",
+              background:
+                "linear-gradient(73.49deg, #b11116 0%, #ee4f53 98.48%)",
+            }}
+          >
+            LOGIN
+          </Button>
+        </Stack>
+      </Stack>
+      <Popper
+        open={popperOpen}
+        anchorEl={popperAnchorel}
+        onClose={handleClosePopper}
+      >
+        <Popper_Menu />
+      </Popper>
     </Box>
+    </>
+
   );
 };
 

@@ -10,7 +10,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   esbuild: {
-    target: 'es2018',
+    target: 'esnext',
   },
   build: {
     chunkSizeWarningLimit: 1000, // Increase the chunk size limit to avoid warnings (in KB)

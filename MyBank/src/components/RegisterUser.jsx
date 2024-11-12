@@ -13,6 +13,8 @@ import {
   Stack,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { Navigate, Link as RouterLink } from "react-router-dom";
 import { CaretRight, Eye, EyeSlash } from "phosphor-react";
@@ -20,6 +22,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { RegisterUserFun } from "../Redux/UserAuth/Auth";
 
 const RegisterUser = () => {
+  const Muitheme = useTheme();
+  const isSmallScreen = useMediaQuery(Muitheme.breakpoints.down('sm'));
     const {isRegisterSuccess,isLoading} = useSelector((state)=>state.auth);
     const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
@@ -58,8 +62,8 @@ const RegisterUser = () => {
         sx={{
           width: "100%",
           height: "100vh",
-          display: "flex",
-          flexDirection: "row",
+          display:isSmallScreen ? "": "flex",
+          flexDirection:isSmallScreen ? "" : "row",
         }}
       >
         {/* Left side */}
@@ -109,6 +113,7 @@ const RegisterUser = () => {
               <Stack spacing={2}>
                 <TextField
                   fullWidth
+                  required
                   variant="outlined"
                   placeholder="First Name"
                   autoComplete="off"
@@ -129,6 +134,7 @@ const RegisterUser = () => {
                 />
                 <TextField
                   fullWidth
+                  required
                   variant="outlined"
                   placeholder="Last Name"
                   autoComplete="off"
@@ -149,6 +155,7 @@ const RegisterUser = () => {
                 />
                 <TextField
                   fullWidth
+                  required
                   variant="outlined"
                   placeholder="Enter Email"
                   autoComplete="off"
@@ -169,6 +176,7 @@ const RegisterUser = () => {
                 />
                 <TextField
                   fullWidth
+                  required
                   variant="outlined"
                   placeholder="Phone Number"
                   autoComplete="off"
@@ -189,6 +197,7 @@ const RegisterUser = () => {
                 />
                 <TextField
                   fullWidth
+                  required
                   variant="outlined"
                   placeholder="Password"
                   type={showPassword ? "text" : "password"}
@@ -334,85 +343,88 @@ const RegisterUser = () => {
         </Box>
 
         {/* Right Side */}
-        <Box
-          sx={{ backgroundColor: "rgb(249 250 251)", flexGrow: 1, padding: 1 }}
+        {!isSmallScreen && (
+  <Box
+  sx={{ backgroundColor: "rgb(249 250 251)", flexGrow: 1, padding: 1 }}
+>
+  {/* Header */}
+  <Box
+    sx={{
+      display: "flex",
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      alignItems: "center",
+      gap: 3, // spacing between items
+      p: 5, // padding for header section
+    }}
+  >
+    <Typography variant="caption" component={RouterLink} to={"/"}>
+      Home
+    </Typography>
+    <Typography variant="caption">Contact Us</Typography>
+    <Typography variant="caption">Privacy Policy</Typography>
+  </Box>
+
+  {/* Centered Image */}
+  <Box
+    sx={{
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
+      p: 3,
+      alignItems: "center",
+      marginTop: 10,
+      height: "60vh",
+    }}
+  >
+    <img
+      src={MinImage}
+      alt="Login Image"
+      style={{ objectFit: "cover", width: "100%", maxWidth: "600px" }}
+    />
+  </Box>
+
+  {/* footer */}
+
+  <Box sx={{ position: "relative", top: 90 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: 3, // spacing between items
+        p: 3, // padding for footer section
+      }}
+    >
+      <Stack direction={"row"} alignItems={"center"} spacing={2}>
+        <Typography
+          component={Link}
+          variant="subtitle2"
+          sx={{ textDecoration: "underline", color: "#3D5159" }}
         >
-          {/* Header */}
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "flex-end",
-              alignItems: "center",
-              gap: 3, // spacing between items
-              p: 5, // padding for header section
-            }}
-          >
-            <Typography variant="caption" component={RouterLink} to={"/"}>
-              Home
-            </Typography>
-            <Typography variant="caption">Contact Us</Typography>
-            <Typography variant="caption">Privacy Policy</Typography>
-          </Box>
-
-          {/* Centered Image */}
-          <Box
-            sx={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "center",
-              p: 3,
-              alignItems: "center",
-              marginTop: 10,
-              height: "60vh",
-            }}
-          >
-            <img
-              src={MinImage}
-              alt="Login Image"
-              style={{ objectFit: "cover", width: "100%", maxWidth: "600px" }}
-            />
-          </Box>
-
-          {/* footer */}
-
-          <Box sx={{ position: "relative", top: 90 }}>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                gap: 3, // spacing between items
-                p: 3, // padding for footer section
-              }}
-            >
-              <Stack direction={"row"} alignItems={"center"} spacing={2}>
-                <Typography
-                  component={Link}
-                  variant="subtitle2"
-                  sx={{ textDecoration: "underline", color: "#3D5159" }}
-                >
-                  Service Agreement
-                </Typography>
-                <Typography
-                  component={Link}
-                  variant="subtitle2"
-                  sx={{ textDecoration: "underline", color: "#3D5159" }}
-                >
-                  Learn About Security
-                </Typography>
-              </Stack>
-              <Stack direction={"row"} alignItems={"center"} spacing={2}>
-                <img src={Secure} alt="FIRST iMAGE" />
-                <Stack direction={"column"} spacing={0.5}>
-                  <Typography variant="caption">Proud member of</Typography>
-                  <img src={Banknet} alt="Bank Nrt Image" />
-                </Stack>
-              </Stack>
-            </Box>
-          </Box>
-        </Box>
+          Service Agreement
+        </Typography>
+        <Typography
+          component={Link}
+          variant="subtitle2"
+          sx={{ textDecoration: "underline", color: "#3D5159" }}
+        >
+          Learn About Security
+        </Typography>
+      </Stack>
+      <Stack direction={"row"} alignItems={"center"} spacing={2}>
+        <img src={Secure} alt="FIRST iMAGE" />
+        <Stack direction={"column"} spacing={0.5}>
+          <Typography variant="caption">Proud member of</Typography>
+          <img src={Banknet} alt="Bank Nrt Image" />
+        </Stack>
+      </Stack>
+    </Box>
+  </Box>
+</Box>
+        )}
+      
       </Box>
     </>
   );

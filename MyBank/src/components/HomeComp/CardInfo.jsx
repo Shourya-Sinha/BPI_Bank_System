@@ -91,9 +91,8 @@ const CardInfo = () => {
   };
   return (
     <>
-      <Container maxWidth={"lg"} sx={{ marginTop: 5, paddingTop: 5 }}>
+      {/* <Container maxWidth={"lg"} sx={{ marginTop: 5, paddingTop: 5 }}>
         <Box width={"100%"}>
-          {/* Header */}
           <Stack
             sx={{
               width: 90,
@@ -151,7 +150,7 @@ const CardInfo = () => {
               </Box>
             </Stack>
           </Stack>
-          {/* Cards */}
+
           <Stack mt={4}>
             <Slider ref={sliderRef} {...settings}>
               {cards.map((card, index) => (
@@ -225,6 +224,156 @@ const CardInfo = () => {
                 color: "#b11116",
                 fontWeight: 600,
                 fontSize: 16,
+                padding: "10px 20px",
+                borderRadius: "4px",
+                border: "2px solid #b11116",
+                "&:hover": {
+                  backgroundColor: "#b11116",
+                  color: "#ffffff",
+                },
+              }}
+              endIcon={<ArrowRight style={{ marginLeft: 5 }} size={25} />}
+            >
+              EXPLORE PROMOSTIONS
+            </Button>
+          </Stack>
+        </Box>
+      </Container> */}
+
+<Container maxWidth={"lg"} sx={{ marginTop: 5, paddingTop: 5 }}>
+        <Box width={"100%"}>
+          {/* Header */}
+          <Stack
+            sx={{
+              width: 90,
+              height: 7,
+              backgroundColor: "#b11116",
+              marginBottom: 2,
+            }}
+          />
+          <Stack
+            direction={"row"}
+            justifyContent={"space-between"}
+            sx={{ marginBottom: 4 }}
+          >
+            <Typography
+              sx={{ fontSize: "clamp(1.2rem, 2vw, 1.9rem)", fontWeight: 600, color: "#1a1a1a" }}
+            >
+              Check out our holiday offers and promos
+            </Typography>
+            <Stack direction={"row"} spacing={1}>
+              <Box
+                sx={{
+                  backgroundColor: "#5d5d5d",
+                  borderRadius: "4px",
+                  height: "clamp(30px, 2vw, 150px)",
+                  width: "clamp(30px, 2vw, 150px)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "#c00",
+                  },
+                }}
+                onClick={() => sliderRef.current.slickPrev()}
+              >
+                <ArrowLeft sx={{fontSize:"clamp(30px, 2vw, 150px)"}} color="#fff" />
+              </Box>
+              <Box
+                sx={{
+                  backgroundColor: "#1a1a1a",
+                  borderRadius: "4px",
+                  height: "clamp(30px, 2vw, 150px)",
+                  width: "clamp(30px, 2vw, 150px)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "#c00",
+                  },
+                }}
+                onClick={() => sliderRef.current.slickNext()}
+              >
+                <ArrowRight sx={{fontSize:"clamp(30px, 2vw, 150px)"}} color="#fff" />
+              </Box>
+            </Stack>
+          </Stack>
+          {/* Cards */}
+          <Stack mt={4}>
+            <Slider ref={sliderRef} {...settings}>
+              {cards.map((card, index) => (
+                <div key={index}>
+                  <Card
+                    sx={{
+                      maxWidth: 392,
+                      margin: "0 10px",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <CardMedia
+                      sx={{ height: 220 }}
+                      image={card.image}
+                      title={card.title}
+                    />
+                    <CardContent sx={{ padding: "32px 24px", flexGrow: 1 }}>
+                      <Typography
+                        gutterBottom
+                        component="div"
+                        sx={{
+                          fontSize: "clamp(16px, 2vw, 25px)",
+                          color: "#1a1a1a",
+                          whiteSpace: "nowrap",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {card.title}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "text.secondary",
+                          fontSize: "16px",
+                          overflow: "hidden",
+                          whiteSpace: "nowrap",
+                          textOverflow: "ellipsis", // Ellipsis for overflow text
+                          maxHeight: "40px", // Set max height for uniformity
+                        }}
+                      >
+                        {card.description}
+                      </Typography>
+                      <a
+                        style={{
+                          color: "#1a1a1a",
+                          fontSize: "16px",
+                          fontWeight: 600,
+                        }}
+                        href={card.link}
+                      >
+                        View Details
+                      </a>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+            </Slider>
+          </Stack>
+
+          <Stack
+            alignItems={"center"}
+            justifyContent={"center"}
+            sx={{ marginTop: 5 }}
+          >
+            <Button
+              component={Link}
+              to='/maintain'
+              sx={{
+                // backgroundColor: "#b11116",
+                color: "#b11116",
+                fontWeight: 600,
+                fontSize: "clamp(12px, 2vw, 32px)",
                 padding: "10px 20px",
                 borderRadius: "4px",
                 border: "2px solid #b11116",

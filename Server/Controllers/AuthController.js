@@ -1148,6 +1148,8 @@ export const createBankAccount = async (req, res, next) => {
       const ifsc = generateIFSCCode(branchName, bankName);
       const accountNumber = generateAccountNumber();
 
+      const depositAmount = initialDeposit || 0;
+
       await UserBank.findByIdAndUpdate(
         userBank._id,
         {
@@ -1156,7 +1158,7 @@ export const createBankAccount = async (req, res, next) => {
           branchName: branchName,
           bankName: bankName,
           accountNumber: accountNumber,
-          balance: initialDeposit,
+          balance: depositAmount,
           isAccountPending: "Pending", // Mark the account as pending
           ifscCode: ifsc,
           createdAt: moment().toDate(),
@@ -2107,11 +2109,11 @@ export const getUserLoginDetails = async (req, res) => {
 
     // Get the last login time and last failed login time
     const lastLoginTime = user.lastLoginTime
-      ? moment(user.lastLoginTime).format("YYYY-MM-DD HH:mm:ss") // Format as per your needs
+      ? moment(user.lastLoginTime).isValid() ? moment(user.lastLoginTime).format("YYYY-MM-DD HH:mm:ss") : "No login recorded"
       : "No login recorded";
 
     const lastFailedLoginTime = user.lastFailedLoginTime
-      ? moment(user.lastFailedLoginTime).format("YYYY-MM-DD HH:mm:ss") // Format as per your needs
+      ? moment(user.lastFailedLoginTime).isValid() ? moment(user.lastFailedLoginTime).format("YYYY-MM-DD HH:mm:ss") : "No failed login recorded"
       : "No failed login recorded";
 
     return res.status(200).json({

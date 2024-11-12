@@ -7,14 +7,15 @@ import { Link, useNavigate } from "react-router-dom";
 
 const More = ({ setShowMorePanel }) => {
   const navigate = useNavigate();
-
   // Close panel on link click
   const handleClosePanel = (path) => {
     navigate(path);
     setShowMorePanel(false); // Close the transfer panel
   };
   return (
-    <Box
+    <>
+
+        <Box
     sx={{
       maxWidth: 400,
       backgroundColor: "#fff",
@@ -166,6 +167,8 @@ const More = ({ setShowMorePanel }) => {
      
     </Box>
   </Box>
+    </>
+
   )
 }
 
