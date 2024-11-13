@@ -235,6 +235,7 @@ const formatDate = (date) => {
 };
 
 const AllTransactions = () => {
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const Muitheme = useTheme();
   const isSmallScreen = useMediaQuery(Muitheme.breakpoints.down("sm"));
@@ -247,7 +248,7 @@ const AllTransactions = () => {
   const { myAllTransactions } = useSelector(
     (state) => state.auth || { myAllTransactions: [] }
   );
-  // const { userBnakDetails } = useSelector( (state) => state.auth || { userBnakDetails: {}});
+  const { userBnakDetails } = useSelector( (state) => state.auth || { userBnakDetails: {}});
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -259,59 +260,102 @@ const AllTransactions = () => {
   };
 
   useEffect(() => {
-    dispatch(GetMyTransactionHistory());
+    setLoading(true);  // Set loading state to true before starting data fetch
+    dispatch(GetMyTransactionHistory())
+      .finally(() => {
+        setLoading(false);  // Set loading state to false after data fetch is complete
+      });
   }, [dispatch]);
 
-  const rows = myAllTransactions?.homeBankTransactions.map((data) => {
-    const row = createData(
-      data.transactionId ? data.transactionId : "N/A",
-      data.amount ? data.amount : "N/A",
-      data.currency ? data.currency : "N/A",
-      data.receiverUserId?._id ? data.receiverUserId?._id : "N/A",
-      `${data.receiverUserId?.firstName || "N/A"} ${
-        data.receiverUserId?.lastName || "N/A"
-      }`,
-      data.receiverUserId?.email ? data.receiverUserId?.email : "N/A",
-      data.receiverBankAccountNumber ? data.receiverBankAccountNumber : "N/A",
-      data.senderBankAccountNumber ? data.senderBankAccountNumber : "N/A",
-      data.status ? data.status : "N/A",
-      data.transactionType ? data.transactionType : "N/A",
-      formatDateTime(data.timestamp) // Created date
-    );
+  // const rows = myAllTransactions?.homeBankTransactions?.map((data) => {
+  //   const row = createData(
+  //     data.transactionId ? data.transactionId : "N/A",
+  //     data.amount ? data.amount : "N/A",
+  //     data.currency ? data.currency : "N/A",
+  //     data.receiverUserId?._id ? data.receiverUserId?._id : "N/A",
+  //     `${data.receiverUserId?.firstName || "N/A"} ${
+  //       data.receiverUserId?.lastName || "N/A"
+  //     }`,
+  //     data.receiverUserId?.email ? data.receiverUserId?.email : "N/A",
+  //     data.receiverBankAccountNumber ? data.receiverBankAccountNumber : "N/A",
+  //     data.senderBankAccountNumber ? data.senderBankAccountNumber : "N/A",
+  //     data.status ? data.status : "N/A",
+  //     data.transactionType ? data.transactionType : "N/A",
+  //     formatDateTime(data.timestamp) // Created date
+  //   );
 
-    // Return the row with the key
-    return { ...row, key: data._id }; // Use a unique key for each row
-  });
+  //   // Return the row with the key
+  //   return { ...row, key: data._id }; // Use a unique key for each row
+  // });
+  const rows = myAllTransactions?.homeBankTransactions?.length > 0
+    ? myAllTransactions.homeBankTransactions.map((data) => {
+        return createData(
+          data.transactionId || "N/A",
+          data.amount || "N/A",
+          data.currency || "N/A",
+          data.receiverUserId?._id || "N/A",
+          `${data.receiverUserId?.firstName || "N/A"} ${data.receiverUserId?.lastName || "N/A"}`,
+          data.receiverUserId?.email || "N/A",
+          data.receiverBankAccountNumber || "N/A",
+          data.senderBankAccountNumber || "N/A",
+          data.status || "N/A",
+          data.transactionType || "N/A",
+          formatDateTime(data.timestamp) // Created date
+        );
+      })
+    : [];
+  // const rows1 = myAllTransactions?.anotherBankTransactions.map((data) => {
+  //   const row = createData1(
+  //     data.transactionId ? data.transactionId : "N/A",
+  //     data.amount ? data.amount : "N/A",
+  //     data.currency ? data.currency : "N/A",
+  //     data.receiverUserId?._id ? data.receiverUserId?._id : "N/A",
+  //     `${data.anotherBankDetails?.accountHolderName || "N/A"}`,
+  //     data.receiverBankAccountNumber ? data.receiverBankAccountNumber : "N/A",
+  //     data.anotherBankDetails?.bankName
+  //       ? data.anotherBankDetails?.bankName
+  //       : "N/A",
+  //     data.anotherBankDetails?.swiftCode
+  //       ? data.anotherBankDetails?.swiftCode
+  //       : "N/A",
+  //     data.senderBankAccountNumber ? data.senderBankAccountNumber : "N/A",
+  //     data.status ? data.status : "N/A",
+  //     data.transactionType ? data.transactionType : "N/A",
+  //     formatDateTime(data.timestamp) // Created date
+  //   );
 
-  const rows1 = myAllTransactions?.anotherBankTransactions.map((data) => {
-    const row = createData1(
-      data.transactionId ? data.transactionId : "N/A",
-      data.amount ? data.amount : "N/A",
-      data.currency ? data.currency : "N/A",
-      data.receiverUserId?._id ? data.receiverUserId?._id : "N/A",
-      `${data.anotherBankDetails?.accountHolderName || "N/A"}`,
-      data.receiverBankAccountNumber ? data.receiverBankAccountNumber : "N/A",
-      data.anotherBankDetails?.bankName
-        ? data.anotherBankDetails?.bankName
-        : "N/A",
-      data.anotherBankDetails?.swiftCode
-        ? data.anotherBankDetails?.swiftCode
-        : "N/A",
-      data.senderBankAccountNumber ? data.senderBankAccountNumber : "N/A",
-      data.status ? data.status : "N/A",
-      data.transactionType ? data.transactionType : "N/A",
-      formatDateTime(data.timestamp) // Created date
-    );
-
-    // Return the row with the key
-    return { ...row, key: data._id }; // Use a unique key for each row
-  });
+  //   // Return the row with the key
+  //   return { ...row, key: data._id }; // Use a unique key for each row
+  // });
+  const rows1 = myAllTransactions?.anotherBankTransactions?.length > 0
+  ? myAllTransactions.anotherBankTransactions.map((data) => {
+      return createData1(
+        data.transactionId || "N/A",
+        data.amount || "N/A",
+        data.currency || "N/A",
+        data.receiverUserId?._id || "N/A",
+        `${data.anotherBankDetails?.accountHolderName || "N/A"}`,
+        data.receiverBankAccountNumber || "N/A",
+        data.anotherBankDetails?.bankName || "N/A",
+        data.anotherBankDetails?.swiftCode || "N/A",
+        data.senderBankAccountNumber || "N/A",
+        data.status || "N/A",
+        data.transactionType || "N/A",
+        formatDateTime(data.timestamp) // Created date
+      );
+    })
+  : [];
 
   const hasTransactions = rows.length > 0 || rows1.length > 0;
-  const hasMobTransaction =
-    myAllTransactions?.homeBankTransactions?.length > 0 ||
-    myAllTransactions?.anotherBankTransactions.length > 0;
 
+  const hasMobTransaction =
+  myAllTransactions?.homeBankTransactions?.length > 0 ||
+  myAllTransactions?.anotherBankTransactions?.length > 0;
+
+
+    if (loading) {
+      return <p>Loading...</p>;
+    }
   return (
     <>
       {isSmallScreen ? (
@@ -460,10 +504,10 @@ const AllTransactions = () => {
                   )}
                 </Collapse> */}
                 <Collapse in={collapse}>
-  {hasMobTransaction ? (
+                {hasMobTransaction ? (
     myAllTransactions?.homeBankTransactions?.length > 0 ? (
       myAllTransactions.homeBankTransactions.map((transaction) => (
-        <Box sx={{ boxShadow: 3, paddingBottom: 1 }} key={transaction.key}>
+        <Box sx={{ boxShadow: 3, paddingBottom: 1 }} key={transaction._id}>
           <Box
             sx={{
               backgroundColor: "#eeeeee",
@@ -656,10 +700,10 @@ const AllTransactions = () => {
                   )}
                 </Collapse> */}
                 <Collapse in={collapse1}>
-  {hasMobTransaction ? (
+                {hasMobTransaction ? (
     myAllTransactions?.anotherBankTransactions?.length > 0 ? (
       myAllTransactions.anotherBankTransactions.map((transaction) => (
-        <Box sx={{ boxShadow: 3, paddingBottom: 1 }} key={transaction.key}>
+        <Box sx={{ boxShadow: 3, paddingBottom: 1 }} key={transaction._id}>
           <Box
             sx={{
               backgroundColor: "#eeeeee",
@@ -748,7 +792,7 @@ const AllTransactions = () => {
 
           <Box sx={{ marginTop: 3 }}>
             <Paper sx={{ width: "100%", overflow: "hidden", marginBottom: 5 }}>
-              <TableContainer sx={{ maxHeight: 440 }}>
+              {/* <TableContainer sx={{ maxHeight: 440 }}>
                 <Table stickyHeader aria-label="sticky table">
                   <TableHead>
                     <TableRow>
@@ -764,33 +808,6 @@ const AllTransactions = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {/* {rows
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row) => {
-                      return (
-                        <TableRow
-                          hover
-                          role="checkbox"
-                          tabIndex={-1}
-                          key={row.key}
-                        >
-                          {columns.map((column) => {
-                            const value = row[column.id];
-                            return (
-                              <TableCell
-                                key={column.id}
-                                align={column.align}
-                                sx={{ fontSize: 12 }}
-                              >
-                                {column.format && typeof value === "number"
-                                  ? column.format(value)
-                                  : value}
-                              </TableCell>
-                            );
-                          })}
-                        </TableRow>
-                      );
-                    })} */}
                     {hasTransactions ? (
                       rows
                         .slice(
@@ -833,7 +850,61 @@ const AllTransactions = () => {
                     )}
                   </TableBody>
                 </Table>
-              </TableContainer>
+              </TableContainer> */}
+ <TableContainer sx={{ maxHeight: 440 }}>
+          <Table stickyHeader aria-label="sticky table">
+            <TableHead>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.id}
+                    align={column.align}
+                    style={{ minWidth: column.minWidth }}
+                  >
+                    {column.label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                // Show loading message
+                <TableRow>
+                  <TableCell colSpan={columns.length} align="center">
+                    <Typography variant="h6" color="textSecondary">
+                      Loading...
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : hasTransactions ? (
+                // Show table rows when data is available
+                rows
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                    <TableRow hover role="checkbox" tabIndex={-1} key={row.key}>
+                      {columns.map((column) => {
+                        const value = row[column.id];
+                        return (
+                          <TableCell key={column.id} align={column.align} sx={{ fontSize: 12 }}>
+                            {column.format && typeof value === "number" ? column.format(value) : value}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))
+              ) : (
+                // Show "No Data Available" message when no transactions exist
+                <TableRow>
+                  <TableCell colSpan={columns.length} align="center">
+                    <Typography variant="h6" color="textSecondary">
+                      😢 No Data Available
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
               <TablePagination
                 rowsPerPageOptions={[10, 25, 100]}
                 component="div"
@@ -866,33 +937,6 @@ const AllTransactions = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {/* {rows1
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row) => {
-                      return (
-                        <TableRow
-                          hover
-                          role="checkbox"
-                          tabIndex={-1}
-                          key={row.key}
-                        >
-                          {columns1.map((column) => {
-                            const value = row[column.id];
-                            return (
-                              <TableCell
-                                key={column.id}
-                                align={column.align}
-                                sx={{ fontSize: 12 }}
-                              >
-                                {column.format && typeof value === "number"
-                                  ? column.format(value)
-                                  : value}
-                              </TableCell>
-                            );
-                          })}
-                        </TableRow>
-                      );
-                    })} */}
                     {hasTransactions ? (
                       rows1
                         .slice(

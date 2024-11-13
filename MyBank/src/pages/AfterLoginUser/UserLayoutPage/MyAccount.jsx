@@ -769,7 +769,7 @@ const MyAccount = () => {
                 </Stack>
               </Box>
               {myDepositeTransactions.length > 0 ? (
-                myDepositeTransactions.slice(0, 10).map((transaction) => (
+            myDepositeTransactions.slice(0, 10).map((transaction) => (
                   <Box sx={{ boxShadow: 3 }} key={transaction._id}>
                     <Box sx={{ backgroundColor: "#eeeeee", padding: 1 }}>
                       <Typography variant="subtitle2">
