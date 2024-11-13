@@ -6,13 +6,17 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon Server/server.js",
-     "start": "node Server/server.js",
-     "build": "npm install && npm install --prefix MyBank && npm run build --prefix MyBank"
+    "start": "node Server/server.js",
+    "build": "npm install && npm install --prefix MyBank && npm run build --prefix MyBank"
   },
   "author": "SHOURYA SINHA",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/ios": "^6.1.2",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.5.1",
     "cookie-parser": "^1.4.7",

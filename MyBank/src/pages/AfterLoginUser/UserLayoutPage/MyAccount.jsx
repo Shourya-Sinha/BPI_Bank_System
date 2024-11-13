@@ -227,6 +227,7 @@ const MyAccount = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [collapsed1, setCollapsed1] = useState(false);
   const [collapsed2, setCollapsed2] = useState(false);
+  const [collapsed3, setCollapsed3] = useState(false);
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -606,11 +607,12 @@ const MyAccount = () => {
                       ? userBnakDetails?.otherDeatils?.accountType
                       : "N/A"}
                   </Typography>
-                  <IconButton>
+                  <IconButton onClick={()=> setCollapsed3((prev)=> !prev)}>
                     <CaretDown />
                   </IconButton>
                 </Stack>
                 <Divider />
+                <Collapse in={collapsed3}>
                 <Stack sx={{ marginTop: 2 }}>
                   <Typography variant="caption">Available balance</Typography>
                   <Stack
@@ -697,7 +699,54 @@ const MyAccount = () => {
                     </Stack>
                   </Stack>
                 </Stack>
+                </Collapse>
+
               </Box>
+
+              <Box sx={{ paddingTop: 2, paddingBottom: 2 }}>
+                    <Typography variant="body2" sx={{py:1}}>
+                      Want to Add Money in Your Account?
+                    </Typography>
+                    <Stack direction={"row"} alignItems={"center"} spacing={2}>
+                      <TextField
+                        placeholder="Enter Amount"
+                        name="amount"
+                        value={formValues.amount}
+                        onChange={handleInputDeposite}
+                      />
+                      <TextField
+                        placeholder="Your Account Number"
+                        name="accountNumber"
+                        value={formValues.accountNumber}
+                        onChange={handleInputDeposite}
+                      />
+                    </Stack>
+                    <Stack sx={{marginTop:2}}>
+                    <Button
+                        onClick={handleDeposite}
+                        variant="contained"
+                        sx={{
+                          marginTop:1,
+                          borderRadius: 0.5,
+                          paddingX: 4,
+                          paddingY: 2,
+                          color: "#fff",
+                          backgroundColor: "#b11116",
+                          "&:hover": {
+                            backgroundColor: "#fff",
+                            color: "#b11116",
+                            border: "1px solid #b11116",
+                          },
+                        }}
+                      >
+                        {isLoading ? (
+                          <CircularProgress size={24} />
+                        ) : (
+                          "SEND REQUEST TO ADMIN"
+                        )}
+                      </Button>
+                    </Stack>
+                  </Box>
               <Box sx={{ boxShadow: 3, borderRadius: 0.7, marginTop: 4 }}>
                 <Typography
                   variant="subtitle2"
@@ -715,7 +764,7 @@ const MyAccount = () => {
                 >
                   <RemoveRedEye sx={{ color: "#20C997" }} />
                   <Typography variant="subtitle2" sx={{ color: "#20C997" }}>
-                    Get Detained History
+                    Get Detailed History
                   </Typography>
                 </Stack>
               </Box>
@@ -1083,12 +1132,6 @@ const MyAccount = () => {
                     </Stack>
                   </Stack>
                   <Box sx={{ paddingTop: 2, paddingBottom: 2 }}>
-                    {/* <Button
-                variant="contained"
-                sx={{ paddingX: 5, borderRadius: 0.5 }}
-              >
-                Apply
-              </Button> */}
                     <Typography variant="body2">
                       Want to Add Money in Your Account?
                     </Typography>

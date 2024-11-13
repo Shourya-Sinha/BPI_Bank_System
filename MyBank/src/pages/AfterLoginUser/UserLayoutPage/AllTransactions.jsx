@@ -347,7 +347,7 @@ const AllTransactions = () => {
               <Paper
                 sx={{ width: "100%", overflow: "hidden", marginBottom: 5 }}
               >
-                <Collapse in={collapse}>
+                {/* <Collapse in={collapse}>
                   {hasMobTransaction ? (
                     myAllTransactions?.homeBankTransactions.map(
                       (transaction) => (
@@ -458,7 +458,71 @@ const AllTransactions = () => {
                       No transactions found.
                     </Typography> // Fallback if no data
                   )}
-                </Collapse>
+                </Collapse> */}
+                <Collapse in={collapse}>
+  {hasMobTransaction ? (
+    myAllTransactions?.homeBankTransactions?.length > 0 ? (
+      myAllTransactions.homeBankTransactions.map((transaction) => (
+        <Box sx={{ boxShadow: 3, paddingBottom: 1 }} key={transaction.key}>
+          <Box
+            sx={{
+              backgroundColor: "#eeeeee",
+              padding: 1,
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <Typography variant="subtitle2">
+              {formatDate(transaction.timestamp) || "N/A"}
+            </Typography>
+            <Typography variant="caption">
+              {transaction.transactionId || "N/A"}
+            </Typography>
+          </Box>
+          <Stack sx={{ padding: 2, backgroundColor: "#f5f5f5" }}>
+            <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
+              <Stack>
+                <Typography variant="subtitle2" sx={{ paddingY: 1, textTransform: "capitalize" }}>
+                  TXN Type : {transaction.transactionType || "N/A"}
+                </Typography>
+                <Typography variant="subtitle2">
+                  TO: {transaction.receiverBankAccountNumber || "N/A"}
+                </Typography>
+              </Stack>
+              <Stack>
+                <Typography variant="subtitle2">
+                  FROM: {transaction.senderBankAccountNumber || "N/A"}
+                </Typography>
+                <Typography variant="caption">
+                  Receiver name: {`${transaction.receiverUserId?.firstName || "N/A"} ${transaction.receiverUserId?.lastName || "N/A"}`}
+                </Typography>
+              </Stack>
+            </Stack>
+
+            <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
+              <Typography variant="caption" sx={{ paddingY: 1 }}>
+                Amount
+              </Typography>
+              <Typography variant="subtitle2" sx={{ paddingY: 1 }}>
+                -PHP {transaction.amount || "N/A"}
+              </Typography>
+            </Stack>
+            <Stack direction={"row"} alignItems={"center"} justifyContent={"center"}>
+              <Typography variant="caption" sx={{ color: transaction.status === "completed" ? "green" : "red" }}>
+                {transaction.status}
+              </Typography>
+            </Stack>
+          </Stack>
+        </Box>
+      ))
+    ) : (
+      <Typography variant="body2">No home bank transactions found.</Typography>
+    )
+  ) : (
+    <Typography variant="body2">No transactions found.</Typography> // Fallback if no data
+  )}
+</Collapse>
               </Paper>
             </Box>
 
@@ -482,7 +546,7 @@ const AllTransactions = () => {
               <Paper
                 sx={{ width: "100%", overflow: "hidden", marginBottom: 5 }}
               >
-                <Collapse in={collapse1}>
+                {/* <Collapse in={collapse1}>
                   {hasMobTransaction ? (
                     myAllTransactions?.anotherBankTransactions?.map(
                       (transaction) => (
@@ -590,7 +654,78 @@ const AllTransactions = () => {
                       No transactions found.
                     </Typography> // Fallback if no data
                   )}
-                </Collapse>
+                </Collapse> */}
+                <Collapse in={collapse1}>
+  {hasMobTransaction ? (
+    myAllTransactions?.anotherBankTransactions?.length > 0 ? (
+      myAllTransactions.anotherBankTransactions.map((transaction) => (
+        <Box sx={{ boxShadow: 3, paddingBottom: 1 }} key={transaction.key}>
+          <Box
+            sx={{
+              backgroundColor: "#eeeeee",
+              padding: 1,
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <Typography variant="subtitle2">
+              {formatDate(transaction.timestamp) || "N/A"}
+            </Typography>
+            <Typography variant="caption">
+              {transaction.transactionId || "N/A"}
+            </Typography>
+          </Box>
+          <Stack sx={{ padding: 2, backgroundColor: "#f5f5f5" }}>
+            <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
+              <Stack>
+                <Typography variant="subtitle2" sx={{ paddingY: 1, textTransform: "capitalize" }}>
+                  TXN Type : {transaction.transactionType || "N/A"}
+                </Typography>
+                <Typography variant="subtitle2">
+                  TO: {transaction.receiverAccountNumber || "N/A"}
+                </Typography>
+              </Stack>
+              <Stack>
+                <Typography variant="subtitle2">
+                  FROM: {transaction.senderAccountNumber || "N/A"}
+                </Typography>
+                <Typography variant="caption">
+                  Receiver name: {`${transaction.anotherBankDetails?.accountHolderName || "N/A"}`}
+                </Typography>
+              </Stack>
+            </Stack>
+
+            <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
+              <Typography variant="caption" sx={{ paddingY: 1 }}>
+                Amount
+              </Typography>
+              <Typography variant="subtitle2" sx={{ paddingY: 1 }}>
+                -PHP {transaction.amount || "N/A"}
+              </Typography>
+            </Stack>
+            <Stack direction={"row"} alignItems={"center"} justifyContent={"center"}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: transaction.status === "completed" ? "green" : "red",
+                  textTransform: "capitalize",
+                }}
+              >
+                {transaction.status}
+              </Typography>
+            </Stack>
+          </Stack>
+        </Box>
+      ))
+    ) : (
+      <Typography variant="body2">No another bank transactions found.</Typography>
+    )
+  ) : (
+    <Typography variant="body2">No transactions found.</Typography> // Fallback if no data
+  )}
+</Collapse>
+
               </Paper>
             </Box>
             <Stack

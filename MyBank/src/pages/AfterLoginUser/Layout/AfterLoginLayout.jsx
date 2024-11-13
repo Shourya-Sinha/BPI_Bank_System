@@ -81,7 +81,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 const StyledBottomNavigation = styled(BottomNavigation)(({ theme }) => ({
   backgroundColor: "#fff",
-  margin: "1em auto 0",
+  margin: "auto",
   borderRadius: "20px 20px 0 0",
   textAlign: "center",
   boxShadow: theme.shadows[8],

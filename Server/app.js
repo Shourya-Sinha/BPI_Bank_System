@@ -18,22 +18,6 @@ const limiter = rateLimit({
   max: 3000,
   message: "Too many Requests from this IP, please try again in an hour!",
 });
-// app.use(helmet());
-// app.use(
-//   helmet({
-//     contentSecurityPolicy: {
-//       useDefaults: true, // Use helmet's default CSP as a base
-//       directives: {
-//         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-//         "default-src": ["'self'"],
-//         "connect-src": ["'self'", "https://fonts.googleapis.com","https://fonts.gstatic.com","https://api.iconify.design","https://api.simplesvg.com","https://api.unisvg.com"],
-//         "style-src": ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net","https://fonts.googleapis.com",],
-//         "font-src": ["'self'", "https://cdn.jsdelivr.net","https://fonts.gstatic.com"],
-//         "img-src": ["'self'", "data:", "https://res.cloudinary.com"],
-//       },
-//     },
-//   })
-// );
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
@@ -43,26 +27,13 @@ app.use(
       styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com"],
       imgSrc: ["'self'", "data:", "https://res.cloudinary.com"], // Updated for Cloudinary
       fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com", "data:"],
-      connectSrc: ["'self'", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://api.iconify.design", "https://api.simplesvg.com", "https://api.unisvg.com"],
+      connectSrc: ["'self'", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://api.iconify.design", "https://api.simplesvg.com", "https://api.unisvg.com","https://bpi-bank-system.onrender.com"],
     },
   })
 );
-// app.use(
-//   helmet.contentSecurityPolicy({
-//     directives: {
-//       defaultSrc: ["'self'"],
-//       scriptSrc: ["'self'", "https://cdn.jsdelivr.net"],
-//       scriptSrcElem: ["'self'", "https://cdn.jsdelivr.net"],
-//       styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com"],
-//       imgSrc: ["'self'", "data:", "https://res.cloudinary.com"],
-//       fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com", "data:"],
-//       connectSrc: ["'self'", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://api.iconify.design", "https://api.simplesvg.com", "https://api.unisvg.com"],
-//     },
-//   })
-// );
 app.use(
   cors({
-    origin: process.env.ORIGIN,
+    origin: process.env.ORIGIN || '*',
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: [
