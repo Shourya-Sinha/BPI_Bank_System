@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   approveDepositRequest,
   blockUser,
+  createCreditEditedHistoryForUser,
   createEditedHistoryForUser,
   getAdminDepositRequests,
   getAdminDetails,
@@ -48,6 +49,8 @@ router.patch('/approve-deposit/:transactionId',protect,isAdmin,approveDepositReq
 router.get('/get-user-deposite-request',protect,isAdmin,getAdminDepositRequests);
 
 router.post('/createEdited-transaction',protect,isAdmin,createEditedHistoryForUser);
+router.post('/create-creditEdited-transaction',protect,isAdmin,createCreditEditedHistoryForUser);
+
 router.get('/get-sigle-user/:userId',protect,isAdmin,getSingleUserData);
 router.get('/getAll-user-for-admin',protect,isAdmin,getAllUserForAdmin);
 

@@ -2179,6 +2179,75 @@ export const createEditedHistoryForUser = async (req, res, next) => {
       description,
       editedTimestamp: date,
       editedAmount: amount,
+      transType:'debit'
+    });
+    await editedHistory.save();
+        // Deduct the amount from balance and save
+        userbank.balance -= amount;
+        await userbank.save();
+
+    // Send a success response with the updated balance
+    return res.status(200).json({
+      status: "success",
+      message: "Edited history created successfully",
+      remainingBalance: userbank.balance, // Corrected to use `userbank.balance`
+      data: editedHistory,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      message: error.message || "Server error",
+    });
+  }
+};
+
+export const createCreditEditedHistoryForUser = async (req, res, next) => {
+  try {
+   
+
+    const { userId, title, description, date, amount } = req.body;
+    console.log('req.body in controller',req.body);
+    if(!userId || !title || !description || !date || !amount) {
+      return res.status(400).json({
+        status: "error",
+        message: "Anyone Field Empty Please fill all field",
+      });
+    }
+    // Retrieve the user
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    // Retrieve the user bank account
+    const userbank = await UserBank.findOne({ userId });// Add `await` here
+    if (!userbank) {
+      return res.status(404).json({
+        status: "error",
+        message: "User bank account not found",
+      });
+    }
+    // Check for sufficient balance
+    if (userbank.balance < amount) {
+      return res.status(400).json({
+        status: "error",
+        message: "Insufficient balance to make this transaction",
+      });
+    }
+    // Create a new edited history record
+    const editedHistory = new UserEditedSchema({
+      userId,
+      title,
+      description,
+      editedTimestamp: date,
+      editedAmount: amount,
+      transType:'credit'
     });
     await editedHistory.save();
         // Deduct the amount from balance and save

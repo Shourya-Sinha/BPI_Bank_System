@@ -197,6 +197,19 @@ const formatDate = (date) => {
   return `${month} ${day}`; // Return the formatted date like "NOV 11"
 };
 
+const formatDateTimeRecreate = (timestamp) => {
+  const date = new Date(timestamp);
+
+  const monthNames = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
+  
+  const day = date.getDate();
+  const month = monthNames[date.getMonth()]; // Get abbreviated month name (Jan, Feb, etc.)
+
+  return `${month} ${day}`; // Format as "Nov 4"
+};
+
 const MyAccount = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -262,13 +275,13 @@ const MyAccount = () => {
   const processedData = useMemo(() => {
     const sorted = [...(getUserEditedDat || [])].map((data) => {
       const row = createData(
-        formatDate(data?.editedTimestamp),
+        data?.editedTimestamp ? formatDateTimeRecreate(data?.editedTimestamp) : "N/A",
         { title: data?.title || "N/A", description: data?.description || "N/A" },
         `-PHP ${data?.editedAmount ? data?.editedAmount : "N/A"}`,
         `PHP ${userBnakDetails?.balance ? userBnakDetails?.balance?.toFixed(2) : "N/A"}`
       );
   
-      return { ...row, key: data._id, date: data?.editedTimestamp };
+      return { ...row, key: data._id, date: formatDateTimeRecreate(data?.editedTimestamp) };
     });
   
     // Sort the rows based on the sortOrder state

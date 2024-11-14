@@ -18,6 +18,10 @@ const userEditedSchema = new mongoose.Schema({
     },
     editedTimestamp: {
         type: Date,
+    },
+    transType:{
+        type: String,
+        enum: ["credit", "debit"],
     }
 });
 

@@ -617,7 +617,7 @@ if (
                       value={formData2.accountType}
                       onChange={handleInputChangeStep2}
                     >
-                      <MenuItem value="Deposite Account">Deposit Account</MenuItem>
+                      <MenuItem value="Deposit Account">Deposit Account</MenuItem>
                       <MenuItem value="Credit Card">Credit Card</MenuItem>
                       <MenuItem value="Loan Account">Loan</MenuItem>
                     </Select>
@@ -682,12 +682,12 @@ if (
             {selectedProduct === "da" && (
               <Stack sx={{ maxWidth: 450, paddingX: 5 }} spacing={2}>
                 <Typography variant="h6">
-                  Your deposite account number
+                  Your Deposit account number
                 </Typography>
                 <TextField
                   fullWidth
                   variant="outlined" // or "filled", "standard"
-                  placeholder="Enter deposite account number"
+                  placeholder="Enter deposit account number"
                   autoComplete="off"
                   //   value={username}
                   //   onChange={(e) => setUsername(e.target.value)}
@@ -718,7 +718,7 @@ if (
                         {...params}
                         fullWidth
                         variant="outlined"
-                        placeholder="Enter deposite account number"
+                        placeholder="Enter deposit account number"
                         autoComplete="off"
                         sx={{
                           padding: 0.2,
@@ -812,7 +812,7 @@ if (
                         {...params}
                         fullWidth
                         variant="outlined"
-                        placeholder="Enter deposite account number"
+                        placeholder="Enter deposit account number"
                         autoComplete="off"
                         sx={{
                           padding: 0.2,
@@ -901,7 +901,7 @@ if (
                         {...params}
                         fullWidth
                         variant="outlined"
-                        placeholder="Enter deposite account number"
+                        placeholder="Enter deposit account number"
                         autoComplete="off"
                         sx={{
                           padding: 0.2,

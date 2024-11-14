@@ -111,7 +111,7 @@ const CredyCardUser = () => {
           sx={{
             display: "flex",
             flexDirection: "row",
-            alignItems: "center",
+            // alignItems: "center",
             gap: 2,
             padding: 2,
             width: "100%",
@@ -182,7 +182,8 @@ const CredyCardUser = () => {
 
           {/* Right Side Create History */}
 
-          <Box sx={{ padding: 2, width: "60%" }}>
+<Stack sx={{width:'60%'}}>
+<Box sx={{ padding: 2, width: "100%" }}>
             <Stack
               spacing={2}
               sx={{ boxShadow: 2, paddingX: 3, paddingY: 1, borderRadius: 1 }}
@@ -207,7 +208,7 @@ const CredyCardUser = () => {
               </Stack>
             </Stack>
             <Typography variant="h5" sx={{ padding: 3 }}>
-              Create History
+              Create Debit History
             </Typography>
             <form onSubmit={handleSubmitData}>
               <Box>
@@ -265,8 +266,104 @@ const CredyCardUser = () => {
                 </Button>
               </Stack>
             </form>
+
+
+
           </Box>
+          <Box sx={{width:'100%',marginTop:3,marginBottom:3}}>
+          <Divider > OR </Divider>
+          </Box>
+
+          {/* <Box sx={{ padding: 2, width: "100%" }}>
+            <Stack
+              spacing={2}
+              sx={{ boxShadow: 2, paddingX: 3, paddingY: 1, borderRadius: 1 }}
+            >
+              <Stack direction="row" alignItems="center" spacing={2}>
+                <Typography variant="h6">Selected User</Typography>
+                <East />
+                <Stack direction="row" alignItems="center" spacing={3}>
+                  <Typography variant="caption">
+                    User Name - {userName}
+                  </Typography>
+                  <Divider orientation="vertical" flexItem />
+                  <Typography variant="caption" >
+                    User Email - {userEmail}
+                  </Typography>
+                  <Divider orientation="vertical" flexItem />
+                 
+
+                </Stack>
+              </Stack>
+            </Stack>
+            <Typography variant="h5" sx={{ padding: 3 }}>
+              Create Credit History
+            </Typography>
+            <form onSubmit={handleSubmitData}>
+              <Box>
+                <Stack direction="row" alignItems="center" spacing={2}>
+
+                  <Stack spacing={2} sx={{ boxShadow: 1, flexGrow: 1 }}>
+                    <TextField
+                      fullWidth
+                      required
+                      placeholder="Transaction Title"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleInputChange}
+                    />
+                    <TextField
+                      fullWidth
+                      required
+                      placeholder="Transaction Description"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                    />
+                  </Stack>
+
+                  <Stack spacing={2} sx={{ boxShadow: 1, flexGrow: 1 }}>
+                    <TextField
+                      fullWidth
+                      required
+                      placeholder="Transaction Amount"
+                      name="amount"
+                      value={formData.amount}
+                      onChange={handleInputChange}
+                    />
+                    <TextField
+                      fullWidth
+                      required
+                      placeholder="Transaction Date"
+                      type="date"
+                      name="date"
+                      value={formData.date}
+                      onChange={handleInputChange}
+                    />
+                  </Stack>
+                </Stack>
+              </Box>
+              <Stack sx={{ marginTop: 5 }}>
+                <Button
+                  variant="contained"
+                  sx={{ borderRadius: 0.5 }}
+                  onClick={(e) => handleSubmitData(e)}
+                >
+                  Create Transaction
+                </Button>
+              </Stack>
+            </form>
+
+
+
+          </Box> */}
+</Stack>
+
+
+        
         </Box>
+
+      
       </HiddenScrollbarContainer>
     </>
   );
