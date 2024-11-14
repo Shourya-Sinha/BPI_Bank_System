@@ -68,10 +68,10 @@ const EditedHistoryPage = () => {
                 <Stack
                   direction="row"
                   alignItems="center"
-                  spacing={3}
+                  spacing={1}
                   key={user._id}
                   padding={1}
-                  paddingLeft={2}
+                  // paddingLeft={2}
                   paddingBottom={2}
                   sx={{
                     borderBottom: "2px solid #ddd",
@@ -85,11 +85,16 @@ const EditedHistoryPage = () => {
                   onClick={(e) => handleFetchUserDat(user._id, e)}
                 >
                   <Avatar />
-                  <Stack >
+                  <Stack sx={{width:'100%',paddingX:3}}>
                     <Typography variant="caption">{`${
                       user?.firstName || "N/A"
                     } ${user?.lastName || "N/A"}`}</Typography>
-                    <Typography variant="subtitle2">
+                    <Typography variant="subtitle2" sx={{
+        wordWrap: "break-word", // Allows text to wrap within the container
+        overflow: "hidden", // Ensures it won't overflow
+        textOverflow: "ellipsis", // Adds ellipsis for overflowed text (optional)
+        maxWidth: "100%", // Ensures the email doesn't exceed the container's width
+      }}>
                       {user?.email || "N/A"}
                     </Typography>
                   </Stack>

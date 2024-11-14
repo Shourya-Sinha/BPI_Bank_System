@@ -748,7 +748,7 @@ const MyAccount = () => {
                   </Typography>
                 </Stack>
               </Box>
-              {getUserEditedDat.length > 0 ? (
+              {Array.isArray(getUserEditedDat) && getUserEditedDat.length > 0 ? (
             getUserEditedDat.slice(0, 10).map((transaction) => (
                   <Box sx={{ boxShadow: 3 }} key={transaction._id}>
                     <Box sx={{ backgroundColor: "#eeeeee", padding: 1 }}>

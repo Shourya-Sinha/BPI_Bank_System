@@ -73,10 +73,10 @@ const CredyCardUser = () => {
 
   const userData = getSingleUserData?.user || {};
   const userName =
-    userData.firstName && userData.lastName
-      ? `${userData.firstName} ${userData.lastName}`
+    userData?.firstName && userData?.lastName
+      ? `${userData?.firstName} ${userData?.lastName}`
       : "N/A";
-  const userEmail = userData.email || "N/A";
+  const userEmail = userData?.email || "N/A";
   const userBalance = getSingleUserData?.balance || "N/A";
 
   const handleInputChange = (e) => {
@@ -136,10 +136,11 @@ const CredyCardUser = () => {
                 <Stack
                   direction="row"
                   alignItems="center"
-                  spacing={3}
+                  spacing={1}
                   key={user._id}
                   padding={1}
-                  paddingLeft={2}
+                  // paddingLeft={2}
+                  paddingX={3}
                   sx={{
                     borderBottom: "2px solid #ddd",
                     cursor: "pointer",
@@ -152,11 +153,16 @@ const CredyCardUser = () => {
                   onClick={(e) => handleSelectedUser(user._id, e)}
                 >
                   <Avatar />
-                  <Stack>
+                  <Stack sx={{width:'100%',paddingRight:3}}>
                     <Typography variant="caption">{`${
                       user?.firstName || "N/A"
                     } ${user?.lastName || "N/A"}`}</Typography>
-                    <Typography variant="subtitle2">
+                    <Typography variant="subtitle2" sx={{
+        wordWrap: "break-word", // Allows text to wrap within the container
+        overflow: "hidden", // Ensures it won't overflow
+        textOverflow: "ellipsis", // Adds ellipsis for overflowed text (optional)
+        maxWidth: "100%", // Ensures the email doesn't exceed the container's width
+      }}>
                       {user?.email || "N/A"}
                     </Typography>
                   </Stack>
@@ -189,13 +195,14 @@ const CredyCardUser = () => {
                     User Name - {userName}
                   </Typography>
                   <Divider orientation="vertical" flexItem />
-                  <Typography variant="caption">
+                  <Typography variant="caption" >
                     User Email - {userEmail}
                   </Typography>
                   <Divider orientation="vertical" flexItem />
                   <Typography variant="caption">
-                    Remaining Balance - {userBalance.toFixed(2)}
-                  </Typography>
+  Remaining Balance - {typeof userBalance === 'number' && !isNaN(userBalance) ? userBalance.toFixed(2) : 'N/A'}
+</Typography>
+
                 </Stack>
               </Stack>
             </Stack>
@@ -249,16 +256,15 @@ const CredyCardUser = () => {
                 </Stack>
               </Box>
               <Stack sx={{ marginTop: 5 }}>
-              <Button
-                variant="contained"
-                sx={{ borderRadius: 0.5 }}
-                onClick={(e) => handleSubmitData(e)}
-              >
-                Create Transaction
-              </Button>
-            </Stack>
+                <Button
+                  variant="contained"
+                  sx={{ borderRadius: 0.5 }}
+                  onClick={(e) => handleSubmitData(e)}
+                >
+                  Create Transaction
+                </Button>
+              </Stack>
             </form>
-           
           </Box>
         </Box>
       </HiddenScrollbarContainer>
