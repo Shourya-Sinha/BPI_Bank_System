@@ -12,6 +12,8 @@ import { validationResult } from "express-validator";
 import UserBank from "../Models/BankAccount.js";
 import { uploadAccountDocs, uploadAvatar } from "../Utils/UPloadImages.js";
 import sendMail from "../Utils/Mailer.js";
+import UserEditedSchema from '../Models/UserEditedModel.js';
+
 
 const signToken = (userId) => {
   // Specify the expiration time, e.g., '1h' for one hour
@@ -2131,3 +2133,211 @@ export const getUserLoginDetails = async (req, res) => {
     });
   }
 };
+
+export const createEditedHistoryForUser = async (req, res, next) => {
+  try {
+   
+
+    const { userId, title, description, date, amount } = req.body;
+    console.log('req.body in controller',req.body);
+    if(!userId || !title || !description || !date || !amount) {
+      return res.status(400).json({
+        status: "error",
+        message: "Anyone Field Empty Please fill all field",
+      });
+    }
+    // Retrieve the user
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    // Retrieve the user bank account
+    const userbank = await UserBank.findOne({ userId });// Add `await` here
+    if (!userbank) {
+      return res.status(404).json({
+        status: "error",
+        message: "User bank account not found",
+      });
+    }
+    // Check for sufficient balance
+    if (userbank.balance < amount) {
+      return res.status(400).json({
+        status: "error",
+        message: "Insufficient balance to make this transaction",
+      });
+    }
+    // Create a new edited history record
+    const editedHistory = new UserEditedSchema({
+      userId,
+      title,
+      description,
+      editedTimestamp: date,
+      editedAmount: amount,
+    });
+    await editedHistory.save();
+        // Deduct the amount from balance and save
+        userbank.balance -= amount;
+        await userbank.save();
+
+    // Send a success response with the updated balance
+    return res.status(200).json({
+      status: "success",
+      message: "Edited history created successfully",
+      remainingBalance: userbank.balance, // Corrected to use `userbank.balance`
+      data: editedHistory,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      message: error.message || "Server error",
+    });
+  }
+};
+
+export const getUserEditedHistories = async (req, res) => {
+  try {
+    const { userId } = req;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ status: "error", message: "User not found" });
+    }
+
+    const userEditedHistories = await UserEditedSchema.find({ userId }).sort({ editedTimestamp: -1 });
+    return res.status(200).json({
+      status: "success",
+      message: "User edited histories fetched successfully",
+      data: userEditedHistories,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      message: error.message || "Failed to fetch user edited histories",
+    });
+  }
+};
+
+export const getSingleUserData = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Fetch the user details
+    const user = await User.findById(userId).select('firstName lastName email');
+    if (!user) {
+      return res.status(404).json({ status: "error", message: "User not found" });
+    }
+
+    // Fetch the UserBank details based on the userId
+    const userbank = await UserBank.findOne({ userId: userId }).select('balance');
+    if (!userbank) {
+      return res.status(404).json({ status: "error", message: "User bank account not found" });
+    }
+
+    const amount = userbank.balance;
+
+    return res.status(200).json({
+      status: "success",
+      message: "User data fetched successfully",
+      data: {
+        user: user,
+        balance: amount,  // Return `balance` directly from the UserBank document
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      message: error.message || "Server error",
+    });
+  }
+};
+
+
+export const getAllUserForAdmin = async (req, res) => {
+  try {
+    // Fetch all users
+    const allUsers = await User.find().select('firstName lastName email _id');
+    if (!allUsers || allUsers.length === 0) {
+      return res.status(404).json({ status: "error", message: "No users found" });
+    }
+
+    // Use Promise.all to check for UserBank records in parallel
+    const usersWithBankRecords = await Promise.all(
+      allUsers.map(async (user) => {
+        // Fetch the user's bank record with 'isAccountPending' set to 'Verified'
+        const userBank = await UserBank.findOne({ 
+          userId: user._id,
+          isAccountPending: 'Verified' // Filter by 'Verified' status
+        }).select('balance');
+    
+        // Only return the user data with balance if the bank record exists and is verified
+        return userBank ? { ...user.toObject(), balance: userBank.balance } : null;
+      })
+    );
+
+    // Filter out users without a bank record
+    const filteredUsers = usersWithBankRecords.filter(user => user !== null);
+
+    if (filteredUsers.length === 0) {
+      return res.status(404).json({ status: "error", message: "No users with bank records found" });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Users with bank records fetched successfully",
+      data: filteredUsers,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      message: error.message || "Failed to fetch all users",
+    });
+  }
+};
+
+export const getEditedHistoryOfUser = async (req, res, next) => {
+  try {
+    const { userId } = req.query;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ status: "error", message: "User not found" });
+    }
+
+    const userEditedHistories = await UserEditedSchema.find({ userId: userId }).sort({ editedTimestamp: -1 });
+
+    if (!userEditedHistories || userEditedHistories.length === 0) {
+      return res.status(404).json({ status: "error", message: "No edited history found" });
+    }
+
+    const userbankBalance = await UserBank.findOne({ userId: userId }).select('balance');
+
+    if (!userbankBalance) {
+      return res.status(404).json({ status: "error", message: "User bank account not found" });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Edited history fetched successfully",
+      data: userEditedHistories,
+      remainingBalance: userbankBalance.balance  // Only send the balance field
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      message: error.message || "Failed to fetch edited history",
+    });
+  }
+};
+

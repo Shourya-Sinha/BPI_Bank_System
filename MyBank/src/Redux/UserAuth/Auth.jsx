@@ -27,16 +27,22 @@ const initialState = {
     isAccountPending: null,
     isVerifiedAccount: null,
     accountNumber: null,
+    balance:null,
     otherDeatils: {},
   },
   myAllTransactions: [],
   myDepositeTransactions:[],
+  getUserEditedDat:[],
 };
 
 const slice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    updateGetUserData(state,action){
+      state.getUserEditedDat = state.getUserEditedDat || [];
+      state.getUserEditedDat = action.payload.getUserEditedDat;
+    },
     updateDepositeTransaction(state,action){
       state.myDepositeTransactions = state.myDepositeTransactions || [];
       state.myDepositeTransactions = action.payload.transactions;
@@ -107,6 +113,7 @@ const slice = createSlice({
       state.userBnakDetails.isVerifiedAccount =
         action.payload.isVerifiedAccount;
       state.userBnakDetails.otherDeatils = action.payload.otherDeatils;
+      state.userBnakDetails.balance =action.payload.balance
     },
     updateMyTransactions(state, action) {
       state.myAllTransactions = action.payload.myAllTransactions;
@@ -131,6 +138,7 @@ export const {
   updateAccCreated,
   resetAccCreated,
   updateDepositeTransaction,
+  updateGetUserData,
 } = slice.actions;
 
 export function createBankAcc(formValues) {
@@ -450,6 +458,7 @@ export function GetUserBankDetails() {
             isVerifiedAccount: response.data.userBank.isVerifiedAccount,
             accountNumber: response.data.userBank.accountNumber,
             otherDeatils: response.data.userBank,
+            balance: response.data.userBank.balance
           })
         );
         dispatch(updateIsLoading({ isLoading: false, error: false }));
@@ -637,4 +646,20 @@ export function useIsSmallScreen(maxWidth = 600) {
   }, [maxWidth]);
 
   return isSmallScreen;
+}
+
+export function getUserEditedDataHistory(userId) {
+  return async (dispatch) => {
+    try {
+      const response = await axios.get('/user/edited-transaction-history', {
+        withCredentials: true,
+      });
+
+      dispatch(updateGetUserData({ getUserEditedDat: response.data.data }));
+      dispatch(showSnackbar({ severity: 'success', message: response.data.message }));
+    } catch (error) {
+      console.log("error in place", error);
+      dispatch(showSnackbar({ severity: 'error', message: error.message || 'Failed to fetch user edited data history.' }));
+    }
+  };
 }

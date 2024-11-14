@@ -90,8 +90,8 @@ const StyledBottomNavigation = styled(BottomNavigation)(({ theme }) => ({
 const StyledBottomNavigationAction = styled(BottomNavigationAction)(
   ({ theme }) => ({
     fontSize: "1.6em",
-    padding: "0.5em",
-    margin: "0.1em",
+    padding: "0.1em",
+    // margin: "0.1em",
     transition:
       "transform 0.3s ease, box-shadow 0.3s ease, border-radius 0.3s ease",
     "& .icon-wrapper": {
@@ -328,6 +328,7 @@ const AfterLoginLayout = () => {
               left: 0,
               right:0,
               boxShadow: 9,
+              paddingX:12
             }}
             value={value}
             onChange={handleNavigationChange}

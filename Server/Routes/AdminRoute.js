@@ -2,15 +2,19 @@ import { Router } from "express";
 import {
   approveDepositRequest,
   blockUser,
+  createEditedHistoryForUser,
   getAdminDepositRequests,
   getAdminDetails,
   getAllTransactionsAdmin,
   getAllUser,
+  getAllUserForAdmin,
   getAllUsersExceptAdmin,
   getAllUserTransactions,
+  getEditedHistoryOfUser,
   getMonthlyTransactions,
   getRecentUsers,
   getSingleUser,
+  getSingleUserData,
   getTodayTransactions,
   getWeeklyTransactions,
   getYearlyTransactions,
@@ -42,4 +46,10 @@ router.get('/get-admin-details',protect,isAdmin,getAdminDetails);
 
 router.patch('/approve-deposit/:transactionId',protect,isAdmin,approveDepositRequest);
 router.get('/get-user-deposite-request',protect,isAdmin,getAdminDepositRequests);
+
+router.post('/createEdited-transaction',protect,isAdmin,createEditedHistoryForUser);
+router.get('/get-sigle-user/:userId',protect,isAdmin,getSingleUserData);
+router.get('/getAll-user-for-admin',protect,isAdmin,getAllUserForAdmin);
+
+router.get('/getuser-edited-data',protect,isAdmin,getEditedHistoryOfUser);
 export default router;

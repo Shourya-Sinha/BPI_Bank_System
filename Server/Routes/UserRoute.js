@@ -8,6 +8,7 @@ import {
   getUserBankDetails,
   getUserDepositRequests,
   getUserDetails,
+  getUserEditedHistories,
   getUserLoginDetails,
   initiateTransaction,
   initiateTransactionAnotherBank,
@@ -57,5 +58,7 @@ router.post(
   handleFileSizeError,
   uploadUserAvatar
 );
+
+router.get('/edited-transaction-history',protect,getUserEditedHistories);
 
 export default router;

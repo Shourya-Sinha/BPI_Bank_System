@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ContentCopy,
   DescriptionOutlined,
@@ -34,6 +34,7 @@ import {
   Card,
   CardMedia,
   CardContent,
+  Popover,
 } from "@mui/material";
 import {
   ArrowsLeftRight,
@@ -49,6 +50,7 @@ import {
   DepositeRequestAmount,
   GetDepositeRequest,
   GetMyTransactionHistory,
+  getUserEditedDataHistory,
   useIsSmallScreen,
 } from "../../../Redux/UserAuth/Auth";
 import { Link, Navigate, useNavigate } from "react-router-dom";
@@ -57,6 +59,7 @@ import { ShoppingOutlined } from "@ant-design/icons";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { fontSize } from "@mui/system";
+import { DatePicker } from "antd";
 
 const sliderData = [
   {
@@ -118,52 +121,31 @@ const HiddenScrollbarContainer = styled("div")({
 });
 
 const columns = [
-  { id: "txnid", label: "TXN-ID", minWidth: 170 },
-  { id: "amount", label: "Amount", minWidth: 100 },
+  { id: "date", label: "Date", minWidth: 170 },
+  { id: "name", label: "Name", minWidth: 100 },
   {
-    id: "reciverid",
-    label: "My ID",
+    id: "debitcredit",
+    label: "Debit/Credit",
     align: "center",
   },
   {
-    id: "txnstatus",
-    label: "TXN-Approval Status",
-    align: "center",
-  },
-  {
-    id: "depositetype",
-    label: "TXN-Type",
-    align: "center",
-  },
-  {
-    id: "description",
-    label: "Descitption",
-    align: "center",
-  },
-  {
-    id: "created",
-    label: "Created At",
+    id: "runningbal",
+    label: "Running Balance",
     align: "center",
   },
 ];
 
 function createData(
-  txnid,
-  amount,
-  reciverid,
-  txnstatus,
-  depositetype,
-  description,
-  created
+  date,
+  name,
+  debitcredit,
+  runningbal,
 ) {
   return {
-    txnid,
-    amount,
-    reciverid,
-    txnstatus,
-    depositetype,
-    description,
-    created,
+    date,
+    name,
+    debitcredit,
+    runningbal,
   };
 }
 
@@ -219,21 +201,25 @@ const MyAccount = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const Muitheme = useTheme();
+  
   const isSmallScreen = useMediaQuery(Muitheme.breakpoints.down("sm"));
   // const isSmallScreen = useIsSmallScreen();
-  const { isLoading, myDepositeTransactions } = useSelector(
-    (state) => state.auth || { myDepositeTransactions: [] }
+  const { isLoading, getUserEditedDat } = useSelector(
+    (state) => state.auth || { getUserEditedDat: [] }
   );
   const [collapsed, setCollapsed] = useState(false);
   const [collapsed1, setCollapsed1] = useState(false);
   const [collapsed2, setCollapsed2] = useState(false);
   const [collapsed3, setCollapsed3] = useState(false);
-
+  const [sortOrder, setSortOrder] = useState('newest'); // or 'oldest'
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const { userBnakDetails } = useSelector(
     (state) => state.auth || { userBnakDetails: {} }
   );
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -244,7 +230,7 @@ const MyAccount = () => {
   };
 
   useEffect(() => {
-    dispatch(GetDepositeRequest());
+    dispatch(getUserEditedDataHistory());
   }, [dispatch]);
 
   const formatDateTime = (timestamp) => {
@@ -260,40 +246,49 @@ const MyAccount = () => {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
 
-  const rows = (myDepositeTransactions || []).map((data) => {
-    const row = createData(
-      data?.transactionId ? data?.transactionId : "N/A",
-      data?.amount ? data?.amount : "N/A",
-      data?.receiverUserId?._id ? data.receiverUserId?._id : "N/A",
-      data?.status ? data?.status : "N/A",
-      data?.transactionType ? data.transactionType : "N/A",
-      data?.description ? data?.description : "N/A",
-      formatDateTime(data?.timestamp) // Created date
-    );
+  // const rows = (getUserEditedDat || []).map((data) => {
+  //   const row = createData(
+  //     formatDate(data?.editedTimestamp),
+  //     { title: data?.title || "N/A", description: data?.description || "N/A" },
+  //     `-PHP ${data?.editedAmount ? data?.editedAmount : "N/A"}`,
+  //    `PHP ${ userBnakDetails?.balance ? userBnakDetails?.balance?.toFixed(2) : "N/A"}`
+  //      // Created date
+  //   );
 
-    // Return the row with the key
-    return { ...row, key: data._id }; // Use a unique key for each row
-  });
+  //   // Return the row with the key
+  //   return { ...row, key: data._id }; // Use a unique key for each row
+  // });
 
-  const [formValues, setFormValues] = useState({
-    amount: "",
-    accountNumber: userBnakDetails?.accountNumber,
-  });
+  const processedData = useMemo(() => {
+    const sorted = [...(getUserEditedDat || [])].map((data) => {
+      const row = createData(
+        formatDate(data?.editedTimestamp),
+        { title: data?.title || "N/A", description: data?.description || "N/A" },
+        `-PHP ${data?.editedAmount ? data?.editedAmount : "N/A"}`,
+        `PHP ${userBnakDetails?.balance ? userBnakDetails?.balance?.toFixed(2) : "N/A"}`
+      );
+  
+      return { ...row, key: data._id, date: data?.editedTimestamp };
+    });
+  
+    // Sort the rows based on the sortOrder state
+    const sortedRows = sorted.sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+  
+    // Apply filtering based on start and end dates if set
+    const filteredRows = sortedRows.filter((row) => {
+      const rowDate = new Date(row.date);
+      return (!startDate || rowDate >= new Date(startDate)) &&
+             (!endDate || rowDate <= new Date(endDate));
+    });
+  
+    return filteredRows;
+  }, [getUserEditedDat, userBnakDetails, sortOrder, startDate, endDate]);
 
-  const handleInputDeposite = (e) => {
-    const { name, value } = e.target;
-    setFormValues({ ...formValues, [name]: value });
-  };
 
-  const handleDeposite = (e) => {
-    e.preventDefault();
-    // console.log('formValues deposit',formValues);
-    dispatch(DepositeRequestAmount(formValues));
-  };
-
-  useEffect(() => {
-    console.log("isSmallScreen:", isSmallScreen); // Log when it changes
-  }, [isSmallScreen]);
   const handleBoxClick = () => {
     setCollapsed2(true);
   };
@@ -325,6 +320,36 @@ const MyAccount = () => {
     autoplay: true,         // Autoplay slides
     autoplaySpeed: 5000,    // Set autoplay interval
   };
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+    setOpen((prev) => !prev);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover' : undefined;
+
+  const handleSortChange = (order) => {
+    setSortOrder(order);
+    handleClose(); // Close the popover after the selection
+  };
+  const handleStartDateChange = (date) => {
+    setStartDate(date);
+  };
+  
+  const handleEndDateChange = (date) => {
+    setEndDate(date);
+  };
+  const handleResetSirting=()=>{
+    setSortOrder("newest");
+    setStartDate(null);
+    setEndDate(null);
+  }
   return (
     <>
       {isSmallScreen ? (
@@ -702,51 +727,6 @@ const MyAccount = () => {
                 </Collapse>
 
               </Box>
-
-              <Box sx={{ paddingTop: 2, paddingBottom: 2 }}>
-                    <Typography variant="body2" sx={{py:1}}>
-                      Want to Add Money in Your Account?
-                    </Typography>
-                    <Stack direction={"row"} alignItems={"center"} spacing={2}>
-                      <TextField
-                        placeholder="Enter Amount"
-                        name="amount"
-                        value={formValues.amount}
-                        onChange={handleInputDeposite}
-                      />
-                      <TextField
-                        placeholder="Your Account Number"
-                        name="accountNumber"
-                        value={formValues.accountNumber}
-                        onChange={handleInputDeposite}
-                      />
-                    </Stack>
-                    <Stack sx={{marginTop:2}}>
-                    <Button
-                        onClick={handleDeposite}
-                        variant="contained"
-                        sx={{
-                          marginTop:1,
-                          borderRadius: 0.5,
-                          paddingX: 4,
-                          paddingY: 2,
-                          color: "#fff",
-                          backgroundColor: "#b11116",
-                          "&:hover": {
-                            backgroundColor: "#fff",
-                            color: "#b11116",
-                            border: "1px solid #b11116",
-                          },
-                        }}
-                      >
-                        {isLoading ? (
-                          <CircularProgress size={24} />
-                        ) : (
-                          "SEND REQUEST TO ADMIN"
-                        )}
-                      </Button>
-                    </Stack>
-                  </Box>
               <Box sx={{ boxShadow: 3, borderRadius: 0.7, marginTop: 4 }}>
                 <Typography
                   variant="subtitle2"
@@ -768,12 +748,12 @@ const MyAccount = () => {
                   </Typography>
                 </Stack>
               </Box>
-              {myDepositeTransactions.length > 0 ? (
-            myDepositeTransactions.slice(0, 10).map((transaction) => (
+              {getUserEditedDat.length > 0 ? (
+            getUserEditedDat.slice(0, 10).map((transaction) => (
                   <Box sx={{ boxShadow: 3 }} key={transaction._id}>
                     <Box sx={{ backgroundColor: "#eeeeee", padding: 1 }}>
                       <Typography variant="subtitle2">
-                        {formatDate(transaction.timestamp) || "N/A"}
+                        {formatDate(transaction.editedTimestamp) || "N/A"}
                       </Typography>
                     </Box>
                     <Stack sx={{ padding: 2 }}>
@@ -781,10 +761,10 @@ const MyAccount = () => {
                         variant="subtitle2"
                         sx={{ paddingY: 1, textTransform: "capitalize" }}
                       >
-                        TXN Type : {transaction.transactionType || "N/A"}
+                      {transaction.title || "N/A"}
                       </Typography>
                       <Typography variant="subtitle2">
-                        TO: {transaction.senderAccountNumber || "N/A"}
+                        {transaction.description || "N/A"}
                       </Typography>
 
                       <Stack
@@ -796,7 +776,7 @@ const MyAccount = () => {
                           Amount
                         </Typography>
                         <Typography variant="subtitle2" sx={{ paddingY: 1 }}>
-                          -PHP {transaction.amount || "N/A"}
+                          -PHP {transaction.editedAmount || "N/A"}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -1068,9 +1048,26 @@ const MyAccount = () => {
                           Newest First
                         </Typography>
                       </Stack>
-                      <IconButton>
+                      <IconButton aria-describedby={id} variant="contained" onClick={handleClick}>
                         <CaretDown />
                       </IconButton>
+                      <Popover
+  id={id}
+  open={open}
+  anchorEl={anchorEl}
+  onClose={handleClose}
+  anchorOrigin={{
+    vertical: 'bottom',
+    horizontal: 'right',
+  }}
+  transformOrigin={{
+    vertical: 'top',
+    horizontal: 'right',
+  }}
+>
+<Typography sx={{ px: 6, p: 2, cursor: 'pointer' }} onClick={() => handleSortChange('newest')}>Newest.</Typography>
+<Typography sx={{ px: 6, p: 2, cursor: 'pointer' }} onClick={() => handleSortChange('oldest')}>Oldest.</Typography>
+</Popover>
                     </Stack>
 
                     <Stack
@@ -1092,87 +1089,27 @@ const MyAccount = () => {
                           All transactions
                         </Typography>
                       </Stack>
-                      <IconButton>
+                      <IconButton onClick={handleResetSirting}>
                         <CaretDown />
                       </IconButton>
                     </Stack>
-                    <Stack
-                      direction={"row"}
-                      alignItems={"center"}
-                      justifyContent={"space-between"}
-                      sx={{
-                        width: "100%",
-                        backgroundColor: "#eeeeee",
-                        padding: 2,
-                        borderRadius: 0.5,
-                      }}
-                    >
-                      <Typography variant="subtitle2">Start Date</Typography>
-
-                      <IconButton>
-                        <Calendar />
-                      </IconButton>
-                    </Stack>
-                    <Stack
-                      direction={"row"}
-                      alignItems={"center"}
-                      justifyContent={"space-between"}
-                      sx={{
-                        width: "100%",
-                        backgroundColor: "#eeeeee",
-                        padding: 2,
-                        borderRadius: 0.5,
-                      }}
-                    >
-                      <Typography variant="subtitle2">End Date</Typography>
-
-                      <IconButton>
-                        <Calendar />
-                      </IconButton>
-                    </Stack>
+                    <Stack direction={"row"} alignItems={"center"} justifyContent={"space-between"} sx={{ width: "100%", backgroundColor: "#eeeeee", padding: 2, borderRadius: 0.5 }}>
+          <Typography variant="subtitle2">Start Date</Typography>
+          <DatePicker
+            value={startDate}
+            onChange={handleStartDateChange}
+            renderInput={(props) => <TextField {...props} variant="standard" sx={{ width: 150 }} />}
+          />
+        </Stack>
+        <Stack direction={"row"} alignItems={"center"} justifyContent={"space-between"} sx={{ width: "100%", backgroundColor: "#eeeeee", padding: 2, borderRadius: 0.5 }}>
+          <Typography variant="subtitle2">End Date</Typography>
+          <DatePicker
+            value={endDate}
+            onChange={handleEndDateChange}
+            renderInput={(props) => <TextField {...props} variant="standard" sx={{ width: 150 }} />}
+          />
+        </Stack>
                   </Stack>
-                  <Box sx={{ paddingTop: 2, paddingBottom: 2 }}>
-                    <Typography variant="body2">
-                      Want to Add Money in Your Account?
-                    </Typography>
-                    <Stack direction={"row"} alignItems={"center"} spacing={2}>
-                      <TextField
-                        placeholder="Enter Amount"
-                        name="amount"
-                        value={formValues.amount}
-                        onChange={handleInputDeposite}
-                      />
-                      <TextField
-                        placeholder="Your Account Number"
-                        name="accountNumber"
-                        value={formValues.accountNumber}
-                        onChange={handleInputDeposite}
-                      />
-                      <Button
-                        onClick={handleDeposite}
-                        variant="contained"
-                        sx={{
-                          borderRadius: 0.5,
-                          paddingX: 4,
-                          paddingY: 2,
-                          color: "#fff",
-                          backgroundColor: "#b11116",
-                          "&:hover": {
-                            backgroundColor: "#fff",
-                            color: "#b11116",
-                            border: "1px solid #b11116",
-                          },
-                        }}
-                      >
-                        {isLoading ? (
-                          <CircularProgress size={24} />
-                        ) : (
-                          "SEND REQUEST"
-                        )}
-                      </Button>
-                    </Stack>
-                  </Box>
-
                   <Box>
                     <Paper sx={{ width: "100%", overflow: "hidden" }}>
                       <TableContainer sx={{ maxHeight: 440 }}>
@@ -1191,35 +1128,40 @@ const MyAccount = () => {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {rows.length > 0 ? (
-                              rows
+                            {processedData.length > 0 ? (
+                              processedData
                                 .slice(
                                   page * rowsPerPage,
                                   page * rowsPerPage + rowsPerPage
                                 )
                                 .map((row) => (
-                                  <TableRow
-                                    hover
-                                    role="checkbox"
-                                    tabIndex={-1}
-                                    key={row.code}
-                                  >
-                                    {columns.map((column) => {
-                                      const value = row[column.id];
-                                      return (
-                                        <TableCell
-                                          sx={{ textTransform: "uppercase" }}
-                                          key={column.id}
-                                          align={column.align}
-                                        >
-                                          {column.format &&
-                                          typeof value === "number"
-                                            ? column.format(value)
-                                            : value}
-                                        </TableCell>
-                                      );
-                                    })}
-                                  </TableRow>
+                                  <TableRow hover role="checkbox" tabIndex={-1} key={row.key}>
+                {columns.map((column) => {
+                  const value = row[column.id];
+                  return (
+                    <TableCell
+                      sx={{ textTransform: "uppercase" }}
+                      key={column.id}
+                      align={column.align}
+                    >
+                      {column.id === "name" ? (
+                        <>
+                          <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+                            {value.title}
+                          </Typography>
+                          <Typography variant="caption" color="textSecondary">
+                            {value.description}
+                          </Typography>
+                        </>
+                      ) : column.format && typeof value === "number" ? (
+                        column.format(value)
+                      ) : (
+                        value
+                      )}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
                                 ))
                             ) : (
                               <TableRow>
@@ -1246,7 +1188,7 @@ const MyAccount = () => {
                       <TablePagination
                         rowsPerPageOptions={[10, 25, 100]}
                         component="div"
-                        count={rows.length}
+                        count={processedData.length}
                         rowsPerPage={rowsPerPage}
                         page={page}
                         onPageChange={handleChangePage}

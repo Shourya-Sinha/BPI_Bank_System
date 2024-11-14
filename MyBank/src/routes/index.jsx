@@ -39,6 +39,7 @@ export default function Router() {
         { path: "creditcard", element: <CreditCard /> },
         { path: "userinfo", element: <UserInjfo /> },
         { path: "maindash", element: <MainDash /> },
+        { path: "edited-transaction", element: <EditedHistoryPage /> },
         { path: "*", element: <Navigate to="/404" replace /> },
       ],
     },
@@ -145,6 +146,9 @@ const TransactionReports = Loadable(
 );
 const MainDash = Loadable(
   lazy(() => import("../components/AdminBoard/AdminPage/MainDash.jsx"))
+);
+const EditedHistoryPage = Loadable(
+  lazy(() => import("../components/AdminBoard/AdminPage/EditedHistoryPage.jsx"))
 );
 
 const Login = Loadable(lazy(() => import("../components/Login.jsx")));

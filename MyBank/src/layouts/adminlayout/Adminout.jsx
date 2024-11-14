@@ -71,6 +71,12 @@ const Adminout = () => {
       path: "/admin/creditcard",
     },
     {
+      key: "editedtransaction",
+      icon: <TransactionOutlined />,
+      label: "Edited Transaction History",
+      path: "/admin/edited-transaction",
+    },
+    {
       key: "userinfo",
       icon: <UserAddOutlined />,
       label: "Admin Information",
