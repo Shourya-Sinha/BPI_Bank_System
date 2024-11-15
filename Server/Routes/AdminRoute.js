@@ -4,6 +4,7 @@ import {
   blockUser,
   createCreditEditedHistoryForUser,
   createEditedHistoryForUser,
+  deleteUserEditedHistory,
   getAdminDepositRequests,
   getAdminDetails,
   getAllTransactionsAdmin,
@@ -53,6 +54,7 @@ router.post('/create-creditEdited-transaction',protect,isAdmin,createCreditEdite
 
 router.get('/get-sigle-user/:userId',protect,isAdmin,getSingleUserData);
 router.get('/getAll-user-for-admin',protect,isAdmin,getAllUserForAdmin);
+router.delete('/delete-user-edited-history/:userId/:editedHistoryId', protect, isAdmin, deleteUserEditedHistory);
 
 router.get('/getuser-edited-data',protect,isAdmin,getEditedHistoryOfUser);
 export default router;

@@ -426,6 +426,30 @@ export function CreteEditedTransaction(formValues) {
       });
   };
 }
+//credit
+export function CreteCreditEditedTransaction(formValues) {
+  return async (dispatch) => {
+    await axios
+      .post("/admin/create-creditEdited-transaction", formValues, {
+        withCredentials: true,
+      })
+      .then(function (response) {
+        console.log("response in slice", response.data);
+        dispatch(
+          showSnackbar({ severity: "success", message: response.data.message })
+        );
+      })
+      .catch(function (error) {
+        console.log(error);
+        dispatch(
+          showSnackbar({
+            severity: "error",
+            message: error.message || "Failed to create edited transaction.",
+          })
+        );
+      });
+  };
+}
 
 export function getUserEditedDataHistory(userId) {
   return async (dispatch) => {
@@ -442,4 +466,18 @@ export function getUserEditedDataHistory(userId) {
       dispatch(showSnackbar({ severity: 'error', message: error.message || 'Failed to fetch user edited data history.' }));
     }
   };
+}
+
+export function deleteUserEditedDataHistory(userId,editedHistoryId) {
+  return async (dispatch)=>{
+    await axios.delete(`/admin/delete-user-edited-history/${userId}/${editedHistoryId}`,{withCredentials: true})
+    .then(function (response){
+      console.log('response in slice', response.data);
+      dispatch(showSnackbar({ severity:'success', message: response.data.message }));
+      dispatch(getUserEditedDataHistory(userId));
+    }).catch(function (error){
+      console.log('error in place', error);
+      dispatch(showSnackbar({ severity:'error', message: error.message || 'Failed to delete user edited data history.'}));
+    })  
+  }
 }

@@ -2234,12 +2234,6 @@ export const createCreditEditedHistoryForUser = async (req, res, next) => {
       });
     }
     // Check for sufficient balance
-    if (userbank.balance < amount) {
-      return res.status(400).json({
-        status: "error",
-        message: "Insufficient balance to make this transaction",
-      });
-    }
     // Create a new edited history record
     const editedHistory = new UserEditedSchema({
       userId,
@@ -2267,6 +2261,39 @@ export const createCreditEditedHistoryForUser = async (req, res, next) => {
       status: "error",
       message: error.message || "Server error",
     });
+  }
+};
+
+export const deleteUserEditedHistory = async (req, res) => {
+  try {
+    const { userId, editedHistoryId } = req.params;
+
+    // Find the user by userId
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ status: "error", message: "User not found" });
+    }
+
+    // Check if the history belongs to the user (optional but good practice)
+    const editedHistory = await UserEditedSchema.findById(editedHistoryId);
+
+    if (!editedHistory) {
+      return res.status(404).json({ status: "error", message: "Edited history not found" });
+    }
+
+    // Check if the editedHistory's userId matches the provided userId
+    if (String(editedHistory.userId) !== String(userId)) {
+      return res.status(403).json({ status: "error", message: "This history does not belong to the user" });
+    }
+
+    // Delete the history
+    await UserEditedSchema.findByIdAndDelete(editedHistoryId);
+
+    return res.status(200).json({ status: "success", message: "Edited history deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting edited history:", error);
+    return res.status(500).json({ status: "error", message: "Something went wrong", error: error.message });
   }
 };
 

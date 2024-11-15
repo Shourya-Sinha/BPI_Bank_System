@@ -20,6 +20,7 @@ import {
 import { East } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  CreteCreditEditedTransaction,
   CreteEditedTransaction,
   getALLUserForAdmin,
   getSingleUserForAdmin,
@@ -47,6 +48,14 @@ const CredyCardUser = () => {
     date: "",
   });
 
+  const [formData1, setFormData1] = useState({
+    userId: selectedUserId,
+    title: "",
+    description: "",
+    amount: "",
+    date: "",
+  });
+
   useEffect(() => {
     dispatch(getALLUserForAdmin());
   }, [dispatch]);
@@ -54,6 +63,11 @@ const CredyCardUser = () => {
   useEffect(() => {
     if (selectedUserId !== null) {
       setFormData((prevFormData) => ({
+        ...prevFormData,
+        userId: selectedUserId,
+      }));
+  
+      setFormData1((prevFormData) => ({
         ...prevFormData,
         userId: selectedUserId,
       }));
@@ -79,13 +93,21 @@ const CredyCardUser = () => {
   const userEmail = userData?.email || "N/A";
   const userBalance = getSingleUserData?.balance || "N/A";
 
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleInputChange = (e, formName) => {
+    const { name, value } = e.target;
+  
+    if (formName === "formData") {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [name]: value,
+      }));
+    } else if (formName === "formData1") {
+      setFormData1((prevFormData1) => ({
+        ...prevFormData1,
+        [name]: value,
+      }));
+    }
   };
-
   const handleSubmitData = (e) => {
     e.preventDefault();
     console.log("submitted data", formData);
@@ -97,6 +119,21 @@ const CredyCardUser = () => {
     //   amount: "",
     //   date: "",
     // });
+  };
+
+  const handleSubmitData2 = (e) => {
+    e.preventDefault();
+    // console.log("submitted data for formData1", formData1);
+    dispatch(CreteCreditEditedTransaction(formData1));
+  
+    // Reset form data after submission
+    setFormData1({
+      userId: selectedUserId,
+      title: "",
+      description: "",
+      amount: "",
+      date: "",
+    });
   };
   return (
     <>
@@ -222,7 +259,7 @@ const CredyCardUser = () => {
                       placeholder="Transaction Title"
                       name="title"
                       value={formData.title}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, "formData")}
                     />
                     <TextField
                       fullWidth
@@ -230,7 +267,7 @@ const CredyCardUser = () => {
                       placeholder="Transaction Description"
                       name="description"
                       value={formData.description}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, "formData")}
                     />
                   </Stack>
 
@@ -242,7 +279,7 @@ const CredyCardUser = () => {
                       placeholder="Transaction Amount"
                       name="amount"
                       value={formData.amount}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, "formData")}
                     />
                     <TextField
                       fullWidth
@@ -251,7 +288,7 @@ const CredyCardUser = () => {
                       type="date"
                       name="date"
                       value={formData.date}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, "formData")}
                     />
                   </Stack>
                 </Stack>
@@ -260,7 +297,7 @@ const CredyCardUser = () => {
                 <Button
                   variant="contained"
                   sx={{ borderRadius: 0.5 }}
-                  onClick={(e) => handleSubmitData(e)}
+                  type="submit"
                 >
                   Create Transaction
                 </Button>
@@ -274,7 +311,7 @@ const CredyCardUser = () => {
           <Divider > OR </Divider>
           </Box>
 
-          {/* <Box sx={{ padding: 2, width: "100%" }}>
+          <Box sx={{ padding: 2, width: "100%" }}>
             <Stack
               spacing={2}
               sx={{ boxShadow: 2, paddingX: 3, paddingY: 1, borderRadius: 1 }}
@@ -299,7 +336,7 @@ const CredyCardUser = () => {
             <Typography variant="h5" sx={{ padding: 3 }}>
               Create Credit History
             </Typography>
-            <form onSubmit={handleSubmitData}>
+            <form onSubmit={handleSubmitData2}>
               <Box>
                 <Stack direction="row" alignItems="center" spacing={2}>
 
@@ -309,16 +346,16 @@ const CredyCardUser = () => {
                       required
                       placeholder="Transaction Title"
                       name="title"
-                      value={formData.title}
-                      onChange={handleInputChange}
+                      value={formData1.title}
+                      onChange={(e) => handleInputChange(e, "formData1")}
                     />
                     <TextField
                       fullWidth
                       required
                       placeholder="Transaction Description"
                       name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
+                      value={formData1.description}
+                      onChange={(e) => handleInputChange(e, "formData1")}
                     />
                   </Stack>
 
@@ -328,8 +365,8 @@ const CredyCardUser = () => {
                       required
                       placeholder="Transaction Amount"
                       name="amount"
-                      value={formData.amount}
-                      onChange={handleInputChange}
+                      value={formData1.amount}
+                      onChange={(e) => handleInputChange(e, "formData1")}
                     />
                     <TextField
                       fullWidth
@@ -337,17 +374,17 @@ const CredyCardUser = () => {
                       placeholder="Transaction Date"
                       type="date"
                       name="date"
-                      value={formData.date}
-                      onChange={handleInputChange}
+                      value={formData1.date}
+                      onChange={(e) => handleInputChange(e, "formData1")}
                     />
                   </Stack>
                 </Stack>
               </Box>
               <Stack sx={{ marginTop: 5 }}>
                 <Button
+                type="submit"
                   variant="contained"
                   sx={{ borderRadius: 0.5 }}
-                  onClick={(e) => handleSubmitData(e)}
                 >
                   Create Transaction
                 </Button>
@@ -356,7 +393,7 @@ const CredyCardUser = () => {
 
 
 
-          </Box> */}
+          </Box>
 </Stack>
 
 

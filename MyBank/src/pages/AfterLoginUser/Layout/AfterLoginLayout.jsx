@@ -328,7 +328,7 @@ const AfterLoginLayout = () => {
               left: 0,
               right:0,
               boxShadow: 9,
-              paddingX:12
+              paddingX:30
             }}
             value={value}
             onChange={handleNavigationChange}

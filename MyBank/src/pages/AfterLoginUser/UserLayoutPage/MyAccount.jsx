@@ -43,6 +43,7 @@ import {
   CaretUp,
   Envelope,
   EyeSlash,
+  Plus,
   Shield,
 } from "phosphor-react";
 import { useDispatch, useSelector } from "react-redux";
@@ -68,7 +69,7 @@ const sliderData = [
     title: "Charge your bills to your credit card!",
     description:
       "Enjoy hassle-free payments with more than 400 billers to select from earn interest on earn interest on!",
-    icon: <Payments style={{fontSize:'1em'}} />,
+    icon: <Payments style={{ fontSize: "1em" }} />,
   },
   {
     id: 2,
@@ -76,7 +77,7 @@ const sliderData = [
     title: "Save money with our savings account!",
     description:
       "Create a savings account and earn interest on your savings every month earn interest on!",
-    icon: <SavingsOutlined style={{fontSize:'1em'}} />,
+    icon: <SavingsOutlined style={{ fontSize: "1em" }} />,
   },
   {
     id: 3,
@@ -109,7 +110,7 @@ const sliderData = [
     description:
       "Shop with us and get a free delivery on your next purchase get a free delivery on your next purchase!",
     icon: <ShoppingOutlined />,
-  }
+  },
 ];
 
 const HiddenScrollbarContainer = styled("div")({
@@ -135,12 +136,7 @@ const columns = [
   },
 ];
 
-function createData(
-  date,
-  name,
-  debitcredit,
-  runningbal,
-) {
+function createData(date, name, debitcredit, runningbal) {
   return {
     date,
     name,
@@ -201,9 +197,20 @@ const formatDateTimeRecreate = (timestamp) => {
   const date = new Date(timestamp);
 
   const monthNames = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
-  
+
   const day = date.getDate();
   const month = monthNames[date.getMonth()]; // Get abbreviated month name (Jan, Feb, etc.)
 
@@ -214,7 +221,7 @@ const MyAccount = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const Muitheme = useTheme();
-  
+
   const isSmallScreen = useMediaQuery(Muitheme.breakpoints.down("sm"));
   // const isSmallScreen = useIsSmallScreen();
   const { isLoading, getUserEditedDat } = useSelector(
@@ -224,7 +231,7 @@ const MyAccount = () => {
   const [collapsed1, setCollapsed1] = useState(false);
   const [collapsed2, setCollapsed2] = useState(false);
   const [collapsed3, setCollapsed3] = useState(false);
-  const [sortOrder, setSortOrder] = useState('newest'); // or 'oldest'
+  const [sortOrder, setSortOrder] = useState("newest"); // or 'oldest'
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [page, setPage] = React.useState(0);
@@ -275,32 +282,46 @@ const MyAccount = () => {
   const processedData = useMemo(() => {
     const sorted = [...(getUserEditedDat || [])].map((data) => {
       const row = createData(
-        data?.editedTimestamp ? formatDateTimeRecreate(data?.editedTimestamp) : "N/A",
-        { title: data?.title || "N/A", description: data?.description || "N/A" },
+        data?.editedTimestamp
+          ? formatDateTimeRecreate(data?.editedTimestamp)
+          : "N/A",
+        {
+          title: data?.title || "N/A",
+          description: data?.description || "N/A",
+        },
         `-PHP ${data?.editedAmount ? data?.editedAmount : "N/A"}`,
-        `PHP ${userBnakDetails?.balance ? userBnakDetails?.balance?.toFixed(2) : "N/A"}`
+        `PHP ${
+          userBnakDetails?.balance
+            ? userBnakDetails?.balance?.toFixed(2)
+            : "N/A"
+        }`
       );
-  
-      return { ...row, key: data._id, date: formatDateTimeRecreate(data?.editedTimestamp) };
+
+      return {
+        ...row,
+        key: data._id,
+        date: formatDateTimeRecreate(data?.editedTimestamp),
+      };
     });
-  
+
     // Sort the rows based on the sortOrder state
     const sortedRows = sorted.sort((a, b) => {
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
-      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
     });
-  
+
     // Apply filtering based on start and end dates if set
     const filteredRows = sortedRows.filter((row) => {
       const rowDate = new Date(row.date);
-      return (!startDate || rowDate >= new Date(startDate)) &&
-             (!endDate || rowDate <= new Date(endDate));
+      return (
+        (!startDate || rowDate >= new Date(startDate)) &&
+        (!endDate || rowDate <= new Date(endDate))
+      );
     });
-  
+
     return filteredRows;
   }, [getUserEditedDat, userBnakDetails, sortOrder, startDate, endDate]);
-
 
   const handleBoxClick = () => {
     setCollapsed2(true);
@@ -308,7 +329,7 @@ const MyAccount = () => {
   const [showHeaderOnScroll, setShowHeaderOnScroll] = useState(false);
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 30) {
+      if (window.scrollY > 10) {
         // Adjust the value as needed
         setShowHeaderOnScroll(true);
       } else {
@@ -325,13 +346,13 @@ const MyAccount = () => {
   }, []);
 
   const settings = {
-    dots: true,             // Show navigation dots
-    infinite: true,         // Infinite loop scrolling
-    speed: 1000,             // Transition speed
-    slidesToShow: 1,        // Show one slide at a time
-    slidesToScroll: 1,      // Scroll one slide at a time
-    autoplay: true,         // Autoplay slides
-    autoplaySpeed: 5000,    // Set autoplay interval
+    dots: true, // Show navigation dots
+    infinite: true, // Infinite loop scrolling
+    speed: 1000, // Transition speed
+    slidesToShow: 1, // Show one slide at a time
+    slidesToScroll: 1, // Scroll one slide at a time
+    autoplay: true, // Autoplay slides
+    autoplaySpeed: 5000, // Set autoplay interval
   };
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -345,7 +366,7 @@ const MyAccount = () => {
   };
 
   const open = Boolean(anchorEl);
-  const id = open ? 'simple-popover' : undefined;
+  const id = open ? "simple-popover" : undefined;
 
   const handleSortChange = (order) => {
     setSortOrder(order);
@@ -354,33 +375,48 @@ const MyAccount = () => {
   const handleStartDateChange = (date) => {
     setStartDate(date);
   };
-  
+
   const handleEndDateChange = (date) => {
     setEndDate(date);
   };
-  const handleResetSirting=()=>{
+  const handleResetSirting = () => {
     setSortOrder("newest");
     setStartDate(null);
     setEndDate(null);
-  }
+  };
+  const [visibleCount, setVisibleCount] = useState(5);
+
+  const handleShowMore = () => {
+    setVisibleCount((prevCount) => prevCount + 5); // Increase visible count by 5
+  };
+
+  const visibleHistory =
+    Array.isArray(getUserEditedDat) && getUserEditedDat.length > 0
+      ? getUserEditedDat.slice(0, visibleCount)
+      : [];
+
+      console.log('visible data',visibleHistory);
+
   return (
     <>
       {isSmallScreen ? (
-        <Box sx={{ width: "100%", height: "100%", paddingX: 2, paddingY: 2 }}>
+        <Box sx={{ width: "100%", height: "100%", paddingY: 2 }}>
           {!collapsed2 && (
             <Stack sx={{ cursor: "pointer" }} onClick={handleBoxClick}>
               <Stack
                 direction={"row"}
                 alignItems={"center"}
                 justifyContent={"space-between"}
+                paddingX={2}
               >
                 <Stack>
                   <Typography variant="caption">{getGreeting()},</Typography>
                   <Typography variant="h6">
-                  {userBnakDetails?.otherDeatils?.personalDetails?.accountHolderName
-              ? userBnakDetails?.otherDeatils?.personalDetails
-                  ?.accountHolderName
-              : "N/A"}
+                    {userBnakDetails?.otherDeatils?.personalDetails
+                      ?.accountHolderName
+                      ? userBnakDetails?.otherDeatils?.personalDetails
+                          ?.accountHolderName
+                      : "N/A"}
                   </Typography>
                 </Stack>
                 <Stack direction={"row"} alignItems={"center"} spacing={1}>
@@ -393,40 +429,61 @@ const MyAccount = () => {
                 </Stack>
               </Stack>
               {/* Slider box */}
-              <Stack mt={2} pb={5} sx={{paddingX:2}} >
-              <Slider {...settings}>
-      {sliderData.map((item) => (
-        <Paper
-        elevation={5}
-          key={item.id}
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "#fff",
-            borderRadius: 3,
-            boxShadow: 3,
-            margin: "auto",
-            textAlign: "center",
-          }}
-        >
-          <Box sx={{paddingX:2,paddingTop:3,textAlign:'start'}}>
-            <Stack direction={'row'} alignItems={'center'} spacing={1}>
-              <Stack sx={{width:10,height:10,backgroundColor:'#dc143c',borderRadius:'50%'}} />
-              <Typography variant="caption">{item.date}</Typography>
-            </Stack>
-            <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "bold" }}>
-            {item.title}
-          </Typography>
-          <Typography variant="body2" sx={{ mt: 1, color: "#666",pb:2 }}>
-            {item.description}
-          </Typography>
-          </Box>
-          <Box sx={{ fontSize: "5em", backgroundColor: "#e0f2f1",}}>{item.icon}</Box>
-        </Paper>
-      ))}
-    </Slider>
+              <Stack mt={2} pb={5} sx={{ paddingX: 2 }}>
+                <Slider {...settings}>
+                  {sliderData.map((item) => (
+                    <Paper
+                      elevation={5}
+                      key={item.id}
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: "#fff",
+                        borderRadius: 3,
+                        boxShadow: 3,
+                        margin: "auto",
+                        textAlign: "center",
+                      }}
+                    >
+                      <Box
+                        sx={{ paddingX: 2, paddingTop: 3, textAlign: "start" }}
+                      >
+                        <Stack
+                          direction={"row"}
+                          alignItems={"center"}
+                          spacing={1}
+                        >
+                          <Stack
+                            sx={{
+                              width: 10,
+                              height: 10,
+                              backgroundColor: "#dc143c",
+                              borderRadius: "50%",
+                            }}
+                          />
+                          <Typography variant="caption">{item.date}</Typography>
+                        </Stack>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ mt: 1, fontWeight: "bold" }}
+                        >
+                          {item.title}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{ mt: 1, color: "#666", pb: 2 }}
+                        >
+                          {item.description}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ fontSize: "5em", backgroundColor: "#e0f2f1" }}>
+                        {item.icon}
+                      </Box>
+                    </Paper>
+                  ))}
+                </Slider>
               </Stack>
               <Box
                 sx={{
@@ -476,7 +533,7 @@ const MyAccount = () => {
                   boxShadow: 5,
                   padding: 3,
                   borderRadius: 1,
-                  marginTop: -1,
+                  marginTop: 1,
                   cursor: "pointer",
                 }}
               >
@@ -548,11 +605,12 @@ const MyAccount = () => {
           <Collapse in={collapsed2}>
             <Stack
               sx={{
-                boxShadow: 2,
+                width: "100%",
+                // boxShadow: '0 1px 1px rgba(0, 0, 0, 0.2)',
                 position: "sticky",
                 top: 0,
                 backgroundColor: "white", // Ensures the header has a solid background color
-                zIndex: 10, // Ensures it stays on top of other elements
+                zIndex: 1000, // Ensures it stays on top of other elements
               }}
             >
               <Stack direction={"row"} alignItems={"center"} pb={2} pt={3}>
@@ -584,7 +642,7 @@ const MyAccount = () => {
                   direction="row"
                   alignItems="center"
                   justifyContent="space-between"
-                  paddingX={2}
+                  // paddingX={2}
                   paddingY={2}
                 >
                   <Stack>
@@ -622,7 +680,7 @@ const MyAccount = () => {
               sx={{
                 width: "100%",
                 height: "80vh",
-                paddingX: 2,
+                // paddingX: 2,
                 overflowY: "scroll",
               }}
             >
@@ -645,106 +703,114 @@ const MyAccount = () => {
                       ? userBnakDetails?.otherDeatils?.accountType
                       : "N/A"}
                   </Typography>
-                  <IconButton onClick={()=> setCollapsed3((prev)=> !prev)}>
+                  <IconButton onClick={() => setCollapsed3((prev) => !prev)}>
                     <CaretDown />
                   </IconButton>
                 </Stack>
                 <Divider />
                 <Collapse in={collapsed3}>
-                <Stack sx={{ marginTop: 2 }}>
-                  <Typography variant="caption">Available balance</Typography>
-                  <Stack
-                    direction={"row"}
-                    alignItems={"center"}
-                    spacing={1}
-                    pt={1}
-                  >
-                    <Typography variant="caption">PHP</Typography>
-                    <Typography variant="subtitle2">
-                      {formatBalance(
-                        userBnakDetails?.otherDeatils?.balance
-                          ? userBnakDetails?.otherDeatils?.balance
-                          : "0.00"
-                      )}{" "}
-                    </Typography>
-                  </Stack>
-                  <Typography variant="caption" sx={{ paddingTop: 2 }}>
-                    Total balance
-                  </Typography>
-                  <Stack
-                    direction={"row"}
-                    alignItems={"center"}
-                    spacing={1}
-                    pt={1}
-                  >
-                    <Typography variant="caption">PHP</Typography>
-                    <Typography variant="subtitle2">
-                      {formatBalance(
-                        userBnakDetails?.otherDeatils?.balance
-                          ? userBnakDetails?.otherDeatils?.balance
-                          : "0.00"
-                      )}{" "}
-                    </Typography>
-                  </Stack>
-
-                  <Stack
-                    sx={{ marginTop: 2, mb: 2 }}
-                    direction={"row"}
-                    alignItems={"center"}
-                    spacing={1}
-                  >
-                    <CaretDown style={{ color: "#20C997" }} size={25} />
-                    <Typography variant="subtitle2" sx={{ color: "#20C997" }}>
-                      Show Details
-                    </Typography>
-                  </Stack>
-
-                  <Stack sx={{ borderTop: "1px solid #eeeeee" }}>
+                  <Stack sx={{ marginTop: 2 }}>
+                    <Typography variant="caption">Available balance</Typography>
                     <Stack
                       direction={"row"}
                       alignItems={"center"}
                       spacing={1}
-                      paddingY={1}
+                      pt={1}
                     >
-                      <ArrowsLeftRight style={{ color: "#20C997" }} size={25} />
-                      <Typography sx={{ color: "#20C997" }} variant="subtitle2">
-                        Transfer to
+                      <Typography variant="caption">PHP</Typography>
+                      <Typography variant="subtitle2">
+                        {formatBalance(
+                          userBnakDetails?.otherDeatils?.balance
+                            ? userBnakDetails?.otherDeatils?.balance
+                            : "0.00"
+                        )}{" "}
                       </Typography>
+                    </Stack>
+                    <Typography variant="caption" sx={{ paddingTop: 2 }}>
+                      Total balance
+                    </Typography>
+                    <Stack
+                      direction={"row"}
+                      alignItems={"center"}
+                      spacing={1}
+                      pt={1}
+                    >
+                      <Typography variant="caption">PHP</Typography>
+                      <Typography variant="subtitle2">
+                        {formatBalance(
+                          userBnakDetails?.otherDeatils?.balance
+                            ? userBnakDetails?.otherDeatils?.balance
+                            : "0.00"
+                        )}{" "}
+                      </Typography>
+                    </Stack>
+
+                    <Stack
+                      sx={{ marginTop: 2, mb: 2 }}
+                      direction={"row"}
+                      alignItems={"center"}
+                      spacing={1}
+                    >
                       <CaretDown style={{ color: "#20C997" }} size={25} />
-                    </Stack>
-                    <Stack
-                      direction={"row"}
-                      alignItems={"center"}
-                      spacing={1}
-                      paddingY={1}
-                    >
-                      <FileCopy sx={{ color: "#20C997" }} size={25} />
-                      <Typography sx={{ color: "#20C997" }} variant="subtitle2">
-                        Pay Bills
+                      <Typography variant="subtitle2" sx={{ color: "#20C997" }}>
+                        Show Details
                       </Typography>
                     </Stack>
-                    <Stack
-                      direction={"row"}
-                      alignItems={"center"}
-                      spacing={1}
-                      paddingY={1}
-                      paddingBottom={2}
-                    >
-                      <Payments sx={{ color: "#20C997" }} size={25} />
-                      <Typography sx={{ color: "#20C997" }} variant="subtitle2">
-                        My Statements
-                      </Typography>
+
+                    <Stack sx={{ borderTop: "1px solid #eeeeee" }}>
+                      <Stack
+                        direction={"row"}
+                        alignItems={"center"}
+                        spacing={1}
+                        paddingY={1}
+                      >
+                        <ArrowsLeftRight
+                          style={{ color: "#20C997" }}
+                          size={25}
+                        />
+                        <Typography
+                          sx={{ color: "#20C997" }}
+                          variant="subtitle2"
+                        >
+                          Transfer to
+                        </Typography>
+                        <CaretDown style={{ color: "#20C997" }} size={25} />
+                      </Stack>
+                      <Stack
+                        direction={"row"}
+                        alignItems={"center"}
+                        spacing={1}
+                        paddingY={1}
+                      >
+                        <FileCopy sx={{ color: "#20C997" }} size={25} />
+                        <Typography
+                          sx={{ color: "#20C997" }}
+                          variant="subtitle2"
+                        >
+                          Pay Bills
+                        </Typography>
+                      </Stack>
+                      <Stack
+                        direction={"row"}
+                        alignItems={"center"}
+                        spacing={1}
+                        paddingY={1}
+                        paddingBottom={2}
+                      >
+                        <Payments sx={{ color: "#20C997" }} size={25} />
+                        <Typography
+                          sx={{ color: "#20C997" }}
+                          variant="subtitle2"
+                        >
+                          My Statements
+                        </Typography>
+                      </Stack>
                     </Stack>
                   </Stack>
-                </Stack>
                 </Collapse>
-
               </Box>
               <Box sx={{ boxShadow: 3, borderRadius: 0.7, marginTop: 4 }}>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ paddingY: 2, paddingX: 2 }}
-                >
+                <Typography variant="h6" sx={{ paddingY: 2, paddingX: 2 }}>
                   Transaction history
                 </Typography>
 
@@ -761,8 +827,8 @@ const MyAccount = () => {
                   </Typography>
                 </Stack>
               </Box>
-              {Array.isArray(getUserEditedDat) && getUserEditedDat.length > 0 ? (
-            getUserEditedDat.slice(0, 10).map((transaction) => (
+              {Array.isArray(visibleHistory) && visibleHistory.length > 0 ? (
+                visibleHistory.map((transaction) => (
                   <Box sx={{ boxShadow: 3 }} key={transaction._id}>
                     <Box sx={{ backgroundColor: "#eeeeee", padding: 1 }}>
                       <Typography variant="subtitle2">
@@ -774,9 +840,9 @@ const MyAccount = () => {
                         variant="subtitle2"
                         sx={{ paddingY: 1, textTransform: "capitalize" }}
                       >
-                      {transaction.title || "N/A"}
+                        {transaction.title || "N/A"}
                       </Typography>
-                      <Typography variant="subtitle2">
+                      <Typography variant="body1" sx={{ fontSize: "14px",fontWeight:600,color:'#797B7D' }}>
                         {transaction.description || "N/A"}
                       </Typography>
 
@@ -785,11 +851,26 @@ const MyAccount = () => {
                         justifyContent={"space-between"}
                         alignItems={"center"}
                       >
-                        <Typography variant="caption" sx={{ paddingY: 1 }}>
+                        <Typography
+                          variant="caption"
+                          sx={{ paddingY: 1, color: "#939597" }}
+                        >
                           Amount
                         </Typography>
-                        <Typography variant="subtitle2" sx={{ paddingY: 1 }}>
-                          -PHP {transaction.editedAmount || "N/A"}
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            paddingY: 1,
+                            color: "#40454A",
+                            fontSize: "14px",
+                            fontWeight: 500,
+                          }}
+                        >
+ {transaction?.transType === "debit"
+    ? `-PHP ${transaction.editedAmount || "N/A"}`
+    : transaction?.editedAmount
+    ? `PHP ${transaction.editedAmount}`
+    : "PHP N/A"}                     
                         </Typography>
                       </Stack>
                     </Stack>
@@ -797,6 +878,22 @@ const MyAccount = () => {
                 ))
               ) : (
                 <Typography variant="body2">No transactions found.</Typography> // Fallback if no data
+              )}
+
+              {visibleCount < getUserEditedDat.length && (
+                <Box sx={{ paddingX: 2, width: "100%" ,marginBottom:3,marginTop:1}}>
+                  <Button
+                    fullWidth
+                    onClick={handleShowMore}
+                    variant="contained"
+                    sx={{ backgroundColor: "#fff", color: "#545557" ,boxShadow:'none',border:'1px solid #545557',borderRadius:0.5,paddingY:1}}
+                    startIcon={
+                      <Plus />
+                    }
+                  >
+                    Show More
+                  </Button>
+                </Box>
               )}
             </HiddenScrollbarContainer>
           </Collapse>
@@ -1061,26 +1158,40 @@ const MyAccount = () => {
                           Newest First
                         </Typography>
                       </Stack>
-                      <IconButton aria-describedby={id} variant="contained" onClick={handleClick}>
+                      <IconButton
+                        aria-describedby={id}
+                        variant="contained"
+                        onClick={handleClick}
+                      >
                         <CaretDown />
                       </IconButton>
                       <Popover
-  id={id}
-  open={open}
-  anchorEl={anchorEl}
-  onClose={handleClose}
-  anchorOrigin={{
-    vertical: 'bottom',
-    horizontal: 'right',
-  }}
-  transformOrigin={{
-    vertical: 'top',
-    horizontal: 'right',
-  }}
->
-<Typography sx={{ px: 6, p: 2, cursor: 'pointer' }} onClick={() => handleSortChange('newest')}>Newest.</Typography>
-<Typography sx={{ px: 6, p: 2, cursor: 'pointer' }} onClick={() => handleSortChange('oldest')}>Oldest.</Typography>
-</Popover>
+                        id={id}
+                        open={open}
+                        anchorEl={anchorEl}
+                        onClose={handleClose}
+                        anchorOrigin={{
+                          vertical: "bottom",
+                          horizontal: "right",
+                        }}
+                        transformOrigin={{
+                          vertical: "top",
+                          horizontal: "right",
+                        }}
+                      >
+                        <Typography
+                          sx={{ px: 6, p: 2, cursor: "pointer" }}
+                          onClick={() => handleSortChange("newest")}
+                        >
+                          Newest.
+                        </Typography>
+                        <Typography
+                          sx={{ px: 6, p: 2, cursor: "pointer" }}
+                          onClick={() => handleSortChange("oldest")}
+                        >
+                          Oldest.
+                        </Typography>
+                      </Popover>
                     </Stack>
 
                     <Stack
@@ -1106,22 +1217,54 @@ const MyAccount = () => {
                         <CaretDown />
                       </IconButton>
                     </Stack>
-                    <Stack direction={"row"} alignItems={"center"} justifyContent={"space-between"} sx={{ width: "100%", backgroundColor: "#eeeeee", padding: 2, borderRadius: 0.5 }}>
-          <Typography variant="subtitle2">Start Date</Typography>
-          <DatePicker
-            value={startDate}
-            onChange={handleStartDateChange}
-            renderInput={(props) => <TextField {...props} variant="standard" sx={{ width: 150 }} />}
-          />
-        </Stack>
-        <Stack direction={"row"} alignItems={"center"} justifyContent={"space-between"} sx={{ width: "100%", backgroundColor: "#eeeeee", padding: 2, borderRadius: 0.5 }}>
-          <Typography variant="subtitle2">End Date</Typography>
-          <DatePicker
-            value={endDate}
-            onChange={handleEndDateChange}
-            renderInput={(props) => <TextField {...props} variant="standard" sx={{ width: 150 }} />}
-          />
-        </Stack>
+                    <Stack
+                      direction={"row"}
+                      alignItems={"center"}
+                      justifyContent={"space-between"}
+                      sx={{
+                        width: "100%",
+                        backgroundColor: "#eeeeee",
+                        padding: 2,
+                        borderRadius: 0.5,
+                      }}
+                    >
+                      <Typography variant="subtitle2">Start Date</Typography>
+                      <DatePicker
+                        value={startDate}
+                        onChange={handleStartDateChange}
+                        renderInput={(props) => (
+                          <TextField
+                            {...props}
+                            variant="standard"
+                            sx={{ width: 150 }}
+                          />
+                        )}
+                      />
+                    </Stack>
+                    <Stack
+                      direction={"row"}
+                      alignItems={"center"}
+                      justifyContent={"space-between"}
+                      sx={{
+                        width: "100%",
+                        backgroundColor: "#eeeeee",
+                        padding: 2,
+                        borderRadius: 0.5,
+                      }}
+                    >
+                      <Typography variant="subtitle2">End Date</Typography>
+                      <DatePicker
+                        value={endDate}
+                        onChange={handleEndDateChange}
+                        renderInput={(props) => (
+                          <TextField
+                            {...props}
+                            variant="standard"
+                            sx={{ width: 150 }}
+                          />
+                        )}
+                      />
+                    </Stack>
                   </Stack>
                   <Box>
                     <Paper sx={{ width: "100%", overflow: "hidden" }}>
@@ -1148,33 +1291,45 @@ const MyAccount = () => {
                                   page * rowsPerPage + rowsPerPage
                                 )
                                 .map((row) => (
-                                  <TableRow hover role="checkbox" tabIndex={-1} key={row.key}>
-                {columns.map((column) => {
-                  const value = row[column.id];
-                  return (
-                    <TableCell
-                      sx={{ textTransform: "uppercase" }}
-                      key={column.id}
-                      align={column.align}
-                    >
-                      {column.id === "name" ? (
-                        <>
-                          <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
-                            {value.title}
-                          </Typography>
-                          <Typography variant="caption" color="textSecondary">
-                            {value.description}
-                          </Typography>
-                        </>
-                      ) : column.format && typeof value === "number" ? (
-                        column.format(value)
-                      ) : (
-                        value
-                      )}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
+                                  <TableRow
+                                    hover
+                                    role="checkbox"
+                                    tabIndex={-1}
+                                    key={row.key}
+                                  >
+                                    {columns.map((column) => {
+                                      const value = row[column.id];
+                                      return (
+                                        <TableCell
+                                          sx={{ textTransform: "uppercase" }}
+                                          key={column.id}
+                                          align={column.align}
+                                        >
+                                          {column.id === "name" ? (
+                                            <>
+                                              <Typography
+                                                variant="subtitle2"
+                                                sx={{ fontWeight: "bold" }}
+                                              >
+                                                {value.title}
+                                              </Typography>
+                                              <Typography
+                                                variant="caption"
+                                                color="textSecondary"
+                                              >
+                                                {value.description}
+                                              </Typography>
+                                            </>
+                                          ) : column.format &&
+                                            typeof value === "number" ? (
+                                            column.format(value)
+                                          ) : (
+                                            value
+                                          )}
+                                        </TableCell>
+                                      );
+                                    })}
+                                  </TableRow>
                                 ))
                             ) : (
                               <TableRow>
