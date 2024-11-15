@@ -881,7 +881,7 @@ const MyAccount = () => {
               )}
 
               {visibleCount < getUserEditedDat.length && (
-                <Box sx={{ paddingX: 2, width: "100%" ,marginBottom:3,marginTop:1}}>
+                <Box sx={{ paddingX: 2, width: "100%" ,marginBottom:8,marginTop:1}}>
                   <Button
                     fullWidth
                     onClick={handleShowMore}

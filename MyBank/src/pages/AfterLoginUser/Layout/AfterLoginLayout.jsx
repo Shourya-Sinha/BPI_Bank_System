@@ -80,48 +80,94 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 const StyledBottomNavigation = styled(BottomNavigation)(({ theme }) => ({
-  backgroundColor: "#fff",
+  // backgroundColor: "#000",
   margin: "auto",
-  borderRadius: "20px 20px 0 0",
+  // borderRadius: "20px 20px 0 0",
   textAlign: "center",
   boxShadow: theme.shadows[8],
+  padding: "0 0",
+  [theme.breakpoints.down("sm")]: {
+    paddingX: "50px !important",
+  },
 }));
 
-const StyledBottomNavigationAction = styled(BottomNavigationAction)(
-  ({ theme }) => ({
-    fontSize: "1.6em",
-    padding: "0.1em",
-    // margin: "0.1em",
-    transition:
-      "transform 0.3s ease, box-shadow 0.3s ease, border-radius 0.3s ease",
+const StyledBottomNavigationAction = styled(BottomNavigationAction)(({ theme }) => ({
+  fontSize: "1.6em",
+  padding: "0.1em",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease, border-radius 0.3s ease",
+  "& .icon-wrapper": {
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  },
+  "& .MuiBottomNavigationAction-label": {
+    color: "#888",
+    fontSize: "11px",
+  },
+  "& .MuiSvgIcon-root": {
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  },
+  "&.Mui-selected": {
     "& .icon-wrapper": {
-      transition: "transform 0.3s ease, box-shadow 0.3s ease",
+      transform: "translateY(-8px) scale(1.3)",
+      background: "linear-gradient(195deg, #dc143c, #ff4d6d)",
+      borderRadius: "50%",
+      padding: "1px",
+      color: "#fff",
+      boxShadow: "0px 0px 15px rgba(220, 20, 60, 0.6)",
+      zIndex: 1,
     },
     "& .MuiBottomNavigationAction-label": {
-      color: "#888", // Default color for labels when not selected
-      fontSize: "11px",
+      fontWeight: "bold",
+      fontSize: "10px",
+      color: "#dc143c",
     },
-    "& .MuiSvgIcon-root": {
-      transition: "transform 0.3s ease, box-shadow 0.3s ease", // Smooth animation
+  },
+  // Apply equal width on small screens
+  [theme.breakpoints.down("sm")]: {
+    maxWidth: "100px", // 100% divided by 5 actions
+    fontSize: "1em",
+    "& .MuiBottomNavigationAction-label": {
+      fontSize: "9px",
     },
-    "&.Mui-selected": {
-      "& .icon-wrapper": {
-        transform: "translateY(-8px) scale(1.3)", // Move the icon up and scale up
-        background: "linear-gradient(195deg, #dc143c, #ff4d6d)",
-        borderRadius: "50%",
-        padding: "5px",
-        color: "#fff",
-        boxShadow: "0px 0px 15px rgba(220, 20, 60, 0.6)", // Add a glow effect
-        zIndex: 1,
-      },
-      "& .MuiBottomNavigationAction-label": {
-        fontWeight: "bold",
-        fontSize: "10px",
-        color: "#dc143c",
-      },
-    },
-  })
-);
+  },
+}));
+
+
+
+// const StyledBottomNavigationAction = styled(BottomNavigationAction)(
+//   ({ theme }) => ({
+//     fontSize: "1em",
+//     padding: "0.1em",
+//     // margin: "0.1em",
+//     transition:
+//       "transform 0.3s ease, box-shadow 0.3s ease, border-radius 0.3s ease",
+//     "& .icon-wrapper": {
+//       transition: "transform 0.3s ease, box-shadow 0.3s ease",
+//     },
+//     "& .MuiBottomNavigationAction-label": {
+//       color: "#888", // Default color for labels when not selected
+//       fontSize: "11px",
+//     },
+//     "& .MuiSvgIcon-root": {
+//       transition: "transform 0.3s ease, box-shadow 0.3s ease", // Smooth animation
+//     },
+//     "&.Mui-selected": {
+//       "& .icon-wrapper": {
+//         transform: "translateY(-8px) scale(1.3)", // Move the icon up and scale up
+//         background: "linear-gradient(195deg, #dc143c, #ff4d6d)",
+//         borderRadius: "50%",
+//         padding: "5px",
+//         color: "#fff",
+//         boxShadow: "0px 0px 15px rgba(220, 20, 60, 0.6)", // Add a glow effect
+//         zIndex: 1,
+//       },
+//       "& .MuiBottomNavigationAction-label": {
+//         fontWeight: "bold",
+//         fontSize: "10px",
+//         color: "#dc143c",
+//       },
+//     },
+//   })
+// );
 
 const AfterLoginLayout = () => {
   const [value, setValue] = useState("myaccount"); // Track the selected navigation item
@@ -315,20 +361,20 @@ const AfterLoginLayout = () => {
           </Dialog>
         )}
       {isSmallScreen ? (
-        <Box sx={{ width: "100vw", height: "100vh", paddingX: 2, paddingY: 2 }}>
-          <Box>
+        <Box sx={{ width: "100vw", height: "90vh",paddingX:1, paddingY: 2 }}>
+          <Box >
             <Outlet />
           </Box>
           <StyledBottomNavigation
             showLabels
             sx={{
-              width: "100%",
+              // width: "300px !important",
               position: "fixed",
               bottom: 0,
               left: 0,
               right:0,
               boxShadow: 9,
-              paddingX:30
+              paddingX:15
             }}
             value={value}
             onChange={handleNavigationChange}
@@ -341,7 +387,7 @@ const AfterLoginLayout = () => {
                   className="icon-wrapper"
                   sx={{
                     display: "flex",
-                    flexDirection: "row",
+                    flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
                   }}

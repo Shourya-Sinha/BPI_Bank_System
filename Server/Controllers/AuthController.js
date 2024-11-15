@@ -2183,8 +2183,7 @@ export const createEditedHistoryForUser = async (req, res, next) => {
     });
     await editedHistory.save();
         // Deduct the amount from balance and save
-        userbank.balance -= amount;
-        await userbank.save();
+       
 
     // Send a success response with the updated balance
     return res.status(200).json({
@@ -2245,9 +2244,8 @@ export const createCreditEditedHistoryForUser = async (req, res, next) => {
     });
     await editedHistory.save();
         // Deduct the amount from balance and save
-        userbank.balance -= amount;
+        userbank.balance += amount;
         await userbank.save();
-
     // Send a success response with the updated balance
     return res.status(200).json({
       status: "success",
