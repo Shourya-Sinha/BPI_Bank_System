@@ -435,8 +435,16 @@ export function CreteCreditEditedTransaction(formValues) {
       })
       .then(function (response) {
         console.log("response in slice", response.data);
+        const { remainingBalance , data } = response.data;
         dispatch(
           showSnackbar({ severity: "success", message: response.data.message })
+        );
+        dispatch(
+          updateSingleUserData({
+            userData: {
+              balance: remainingBalance, // Update the balance field
+            },
+          })
         );
       })
       .catch(function (error) {

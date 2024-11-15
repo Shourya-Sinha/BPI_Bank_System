@@ -2203,20 +2203,19 @@ export const createEditedHistoryForUser = async (req, res, next) => {
 
 export const createCreditEditedHistoryForUser = async (req, res, next) => {
   try {
-   
-
     const { userId, title, description, date, amount } = req.body;
-    console.log('req.body in controller',req.body);
-    if(!userId || !title || !description || !date || !amount) {
+    console.log('req.body', req.body);
+
+    // Check if all required fields are present
+    if (!userId || !title || !description || !date || !amount) {
       return res.status(400).json({
         status: "error",
-        message: "Anyone Field Empty Please fill all field",
+        message: "All fields are required",
       });
     }
+
     // Retrieve the user
-
     const user = await User.findById(userId);
-
     if (!user) {
       return res.status(404).json({
         status: "error",
@@ -2224,35 +2223,48 @@ export const createCreditEditedHistoryForUser = async (req, res, next) => {
       });
     }
 
-    // Retrieve the user bank account
-    const userbank = await UserBank.findOne({ userId });// Add `await` here
+    // Retrieve the user's bank account
+    const userbank = await UserBank.findOne({ userId });
     if (!userbank) {
       return res.status(404).json({
         status: "error",
         message: "User bank account not found",
       });
     }
-    // Check for sufficient balance
+
+    // Convert amount to a number
+    const numericAmount = parseFloat(amount);
+    if (isNaN(numericAmount)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Amount must be a valid number",
+      });
+    }
+
     // Create a new edited history record
     const editedHistory = new UserEditedSchema({
       userId,
       title,
       description,
       editedTimestamp: date,
-      editedAmount: amount,
-      transType:'credit'
+      editedAmount: numericAmount,  // Use numericAmount here
+      transType: 'credit',
     });
     await editedHistory.save();
-        // Deduct the amount from balance and save
-        userbank.balance += amount;
-        await userbank.save();
-    // Send a success response with the updated balance
+
+    // Update user bank balance
+    userbank.balance += numericAmount;
+    await userbank.save();
+
+    // Log and send the success response
+    console.log('log in controller data', editedHistory);
     return res.status(200).json({
       status: "success",
       message: "Edited history created successfully",
-      remainingBalance: userbank.balance, // Corrected to use `userbank.balance`
+      remainingBalance: userbank.balance,
       data: editedHistory,
     });
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -2261,6 +2273,7 @@ export const createCreditEditedHistoryForUser = async (req, res, next) => {
     });
   }
 };
+
 
 export const deleteUserEditedHistory = async (req, res) => {
   try {
