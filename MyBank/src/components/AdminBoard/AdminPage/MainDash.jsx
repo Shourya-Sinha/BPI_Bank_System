@@ -338,7 +338,7 @@ const MainDash = () => {
               >
                 <Stack direction={"row"} alignItems={"center"} spacing={1}>
                   <Typography variant="h5">
-                    {weeklyTrans ? weeklyTrans : "0.00"}
+                    {weeklyTrans ? weeklyTrans.toFixed(2) : "0.00"}
                   </Typography>
                   {/* <Typography variant="h5">65783563</Typography> */}
                   <Typography variant="caption" sx={{ color: "#43a047" }}>
@@ -459,7 +459,7 @@ const MainDash = () => {
               >
                 <Stack direction={"row"} alignItems={"center"} spacing={1}>
                   <Typography variant="h5">
-                    {monthlyTrans ? monthlyTrans : "0.00"}
+                    {monthlyTrans ? monthlyTrans.toFixed(2) : "0.00"}
                   </Typography>
                   <Typography variant="caption" sx={{ color: "#43a047" }}>
                     +6.9 %
@@ -580,7 +580,7 @@ const MainDash = () => {
               >
                 <Stack direction={"row"} alignItems={"center"} spacing={1}>
                   <Typography variant="h5">
-                    {annualTrans ? annualTrans : "0.00"}
+                    {annualTrans ? annualTrans.toFixed(2) : "0.00"}
                   </Typography>
                   <Typography variant="caption" sx={{ color: "#43a047" }}>
                     +6.9 %

@@ -3,7 +3,9 @@ import {
   Avatar,
   Box,
   Button,
+  Collapse,
   Divider,
+  IconButton,
   Paper,
   Stack,
   styled,
@@ -25,6 +27,7 @@ import {
   getALLUserForAdmin,
   getSingleUserForAdmin,
 } from "../../../Redux/Admin/AdminFunction";
+import { CaretDown, CaretUp } from "phosphor-react";
 
 const HiddenScrollbarContainer = styled("div")({
   overflow: "hidden", // Prevent scrolling
@@ -36,6 +39,8 @@ const HiddenScrollbarContainer = styled("div")({
 
 const CredyCardUser = () => {
   const dispatch = useDispatch();
+  const [collapase,setCollapsed] =useState();
+  const [collapase1,setCollapsed1] =useState();
   const [selectedUserId, setSelectedUserId] = useState(null);
   const { getAllUserOfAdmin, getSingleUserData } = useSelector(
     (state) => state.admin || { getAllUserOfAdmin: [], getSingleUserData: {} }
@@ -135,10 +140,17 @@ const CredyCardUser = () => {
       date: "",
     });
   };
+
+  const handleCollapseSate=()=>{
+    setCollapsed(((prev)=> !prev));
+  }
+  const handleCollapseSate1=()=>{
+    setCollapsed1(((prev)=> !prev));
+  }
   return (
     <>
-      <HiddenScrollbarContainer
-        sx={{ width: "100%", overflowY: "auto", height: "85vh" }}
+      <Box
+        sx={{ width: "100%"}}
       >
         <Typography variant="h5" sx={{ paddingY: 4 }}>
           Edit OR Create History for Each User
@@ -161,7 +173,7 @@ const CredyCardUser = () => {
               boxShadow: 3,
               borderRadius: 2,
               overflowY: "scroll",
-              maxHeight: "80vh",
+              maxHeight: "70vh",
             }}
           >
             <Typography variant="h5" sx={{ padding: 3 }}>
@@ -189,7 +201,11 @@ const CredyCardUser = () => {
                   }}
                   onClick={(e) => handleSelectedUser(user._id, e)}
                 >
-                  <Avatar />
+                  <Avatar>
+    {user?.firstName && user?.lastName
+      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() // Generate initials
+      : "N/A"} {/* Default text if no name */}
+  </Avatar>
                   <Stack sx={{width:'100%',paddingRight:3}}>
                     <Typography variant="caption">{`${
                       user?.firstName || "N/A"
@@ -219,7 +235,7 @@ const CredyCardUser = () => {
 
           {/* Right Side Create History */}
 
-<Stack sx={{width:'60%'}}>
+<HiddenScrollbarContainer sx={{width:'60%',height:'70vh',overflowY:'scroll'}}>
 <Box sx={{ padding: 2, width: "100%" }}>
             <Stack
               spacing={2}
@@ -238,15 +254,23 @@ const CredyCardUser = () => {
                   </Typography>
                   <Divider orientation="vertical" flexItem />
                   <Typography variant="caption">
-  Remaining Balance - {typeof userBalance === 'number' && !isNaN(userBalance) ? userBalance.toFixed(2) : 'N/A'}
+  Remaining Balance -&gt; {typeof userBalance === 'number' && !isNaN(userBalance) ? userBalance.toFixed(2) : 'N/A'}
 </Typography>
 
                 </Stack>
               </Stack>
             </Stack>
+            <Stack direction={'row'} alignItems={'center'} spacing={5}>
             <Typography variant="h5" sx={{ padding: 3 }}>
               Create Debit History
             </Typography>
+
+            <IconButton onClick={handleCollapseSate}>
+             {collapase ?  <CaretDown /> : <CaretUp />}
+            </IconButton>
+            </Stack>
+           
+            <Collapse in={collapase}>
             <form onSubmit={handleSubmitData}>
               <Box>
                 <Stack direction="row" alignItems="center" spacing={2}>
@@ -303,6 +327,8 @@ const CredyCardUser = () => {
                 </Button>
               </Stack>
             </form>
+            </Collapse>
+
 
 
 
@@ -333,10 +359,16 @@ const CredyCardUser = () => {
                 </Stack>
               </Stack>
             </Stack>
-            <Typography variant="h5" sx={{ padding: 3 }}>
+           <Stack direction="row" alignItems="center" spacing={5}>
+           <Typography variant="h5" sx={{ padding: 3 }}>
               Create Credit History
             </Typography>
-            <form onSubmit={handleSubmitData2}>
+            <IconButton onClick={handleCollapseSate1}>
+             {collapase1?  <CaretDown /> : <CaretUp />}
+            </IconButton>
+           </Stack>
+           <Collapse in={collapase1}>
+           <form onSubmit={handleSubmitData2}>
               <Box>
                 <Stack direction="row" alignItems="center" spacing={2}>
 
@@ -390,18 +422,20 @@ const CredyCardUser = () => {
                 </Button>
               </Stack>
             </form>
+           </Collapse>
+
 
 
 
           </Box>
-</Stack>
+</HiddenScrollbarContainer>
 
 
         
         </Box>
 
       
-      </HiddenScrollbarContainer>
+      </Box>
     </>
   );
 };

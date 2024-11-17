@@ -2204,7 +2204,7 @@ export const createEditedHistoryForUser = async (req, res, next) => {
 export const createCreditEditedHistoryForUser = async (req, res, next) => {
   try {
     const { userId, title, description, date, amount } = req.body;
-    console.log('req.body', req.body);
+    // console.log('req.body', req.body);
 
     // Check if all required fields are present
     if (!userId || !title || !description || !date || !amount) {
@@ -2257,7 +2257,7 @@ export const createCreditEditedHistoryForUser = async (req, res, next) => {
     await userbank.save();
 
     // Log and send the success response
-    console.log('log in controller data', editedHistory);
+    // console.log('log in controller data', editedHistory);
     return res.status(200).json({
       status: "success",
       message: "Edited history created successfully",
