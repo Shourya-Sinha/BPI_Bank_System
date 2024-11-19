@@ -27,21 +27,27 @@ app.use(
       styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com"],
       imgSrc: ["'self'", "data:", "https://res.cloudinary.com"], // Updated for Cloudinary
       fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com", "data:"],
-      connectSrc: ["'self'", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://api.iconify.design", "https://api.simplesvg.com", "https://api.unisvg.com","https://bpi-bank-system.onrender.com","http://localhost:7878"],
+      connectSrc: ["'self'", "https://fonts.googleapis.com","https://mybpi.online","https://www.mybpi.online", "https://fonts.gstatic.com", "https://api.iconify.design", "https://api.simplesvg.com", "https://api.unisvg.com","https://bpi-bank-system.onrender.com","http://localhost:7878"],
     },
   })
 );
+
+const allowedOrigins = [
+  "https://mybpi.online",
+  "https://www.mybpi.online",
+  "https://bpi-bank-system.onrender.com",
+];
+
 app.use(
   cors({
-    origin: process.env.ORIGIN || '*',
-    // origin: function (origin, callback) {
-    //   if (!origin || /localhost/.test(origin) || origin === 'https://bpi-bank-system.onrender.com') {
-    //     // Allow localhost and the production domain
-    //     callback(null, true);
-    //   } else {
-    //     callback(new Error('CORS not allowed by this server'), false);
-    //   }
-    // },
+    // origin: process.env.ORIGIN || '*',
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: [
