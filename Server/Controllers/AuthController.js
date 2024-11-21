@@ -2173,17 +2173,26 @@ export const createEditedHistoryForUser = async (req, res, next) => {
       });
     }
     // Create a new edited history record
+    const numericAmount = parseFloat(amount);
+    if (isNaN(numericAmount)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Amount must be a valid number",
+      });
+    }
+
     const editedHistory = new UserEditedSchema({
       userId,
       title,
       description,
       editedTimestamp: date,
-      editedAmount: amount,
+      editedAmount: numericAmount,
       transType:'debit'
     });
     await editedHistory.save();
         // Deduct the amount from balance and save
-       
+        userbank.balance -= numericAmount;
+        await userbank.save();
 
     // Send a success response with the updated balance
     return res.status(200).json({
