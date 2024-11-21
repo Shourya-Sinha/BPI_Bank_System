@@ -1,29 +1,56 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react';
-// https://vitejs.dev/config/
+// import { defineConfig } from 'vite'
+// import react from '@vitejs/plugin-react';
+
 // export default defineConfig({
 //   plugins: [react()],
 //   esbuild: {
-//     target: 'es2018',
+//     target: 'esnext',
+//   },
+//   build: {
+//     chunkSizeWarningLimit: 1000, // Increase the chunk size limit to avoid warnings (in KB)
+//     rollupOptions: {
+//       output: {
+//         manualChunks: (id) => {
+//           // This helps to split large dependencies into separate chunks (e.g., node_modules)
+//           if (id.includes('node_modules')) {
+//             return 'vendor';
+//           }
+//         },
+//       },
+//     },
 //   },
 // })
+
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import legacy from '@vitejs/plugin-legacy';
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    legacy({
+      targets: ['defaults', 'not IE 11'], // Adds polyfills for unsupported features
+    }),
+  ],
   esbuild: {
-    target: 'esnext',
+    target: 'es2018', // Adjust JavaScript target for Safari
+  },
+  css: {
+    postcss: {
+      plugins: [require('postcss-preset-env')()],
+    },
   },
   build: {
-    chunkSizeWarningLimit: 1000, // Increase the chunk size limit to avoid warnings (in KB)
+    sourcemap: true, // Enables source maps for debugging
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // This helps to split large dependencies into separate chunks (e.g., node_modules)
+        manualChunks(id) {
           if (id.includes('node_modules')) {
-            return 'vendor';
+            return 'vendor'; // Splits large dependencies into a separate chunk
           }
         },
       },
     },
   },
-})
+});
 

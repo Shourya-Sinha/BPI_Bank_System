@@ -1,7 +1,8 @@
 import axios from 'axios';
 // config
 // export const BASE_URL = 'http://localhost:7878'
-export const BASE_URL = 'https://bpi-bank-system.onrender.com'
+// export const BASE_URL = 'https://bpi-bank-system.onrender.com'
+export const BASE_URL = 'https://mybpi.online';
 // 
 // ----------------------------------------------------------------------
 

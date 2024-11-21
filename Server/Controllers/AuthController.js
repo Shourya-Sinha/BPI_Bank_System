@@ -2448,3 +2448,109 @@ export const getEditedHistoryOfUser = async (req, res, next) => {
   }
 };
 
+// export const deleteAllUserInfoAdmin = async (req, res, next) => {
+//   try {
+//     const { userId } = req.query;
+
+//     // Validate input
+//     if (!userId) {
+//       return res.status(400).json({
+//         status: "error",
+//         message: "User ID is required",
+//       });
+//     }
+
+//     // Check if user exists
+//     const user = await User.findById(userId);
+//     if (!user) {
+//       return res.status(404).json({
+//         status: "error",
+//         message: "User not found",
+//       });
+//     }
+
+//     // Delete related data
+//     const userBank = await UserBank.findOneAndDelete({ userId });
+//     if (!userBank) {
+//       return res.status(404).json({
+//         status: "error",
+//         message: "No bank details found for this user",
+//       });
+//     }
+
+//     await Promise.all([
+//       UserEditedSchema.findOneAndDelete({ userId }),
+//       AnotherBankTransaction.findOneAndDelete({ userId }),
+//       Transaction.findOneAndDelete({ userId }),
+//     ]);
+
+//     // Respond with success
+//     return res.status(200).json({
+//       status: "success",
+//       message: "User and all related information deleted successfully",
+//     });
+//   } catch (error) {
+//     console.error("Error deleting user information:", error);
+//     return res.status(500).json({
+//       status: "error",
+//       message: "An error occurred while deleting user information",
+//     });
+//   }
+// };
+
+
+// export const deleteAllUserInfoAdmin = async (req, res, next) => {
+//   try {
+//     const { userId } = req.query;
+
+//     // Validate input
+//     if (!userId) {
+//       return res.status(400).json({
+//         status: "error",
+//         message: "User ID is required",
+//       });
+//     }
+
+//     // Check if user exists
+//     const user = await User.findById(userId);
+//     if (!user) {
+//       return res.status(404).json({
+//         status: "error",
+//         message: "User not found",
+//       });
+//     }
+
+//     // Delete related data
+//     const userBank = await UserBank.findOneAndDelete({ userId });
+//     if (!userBank) {
+//       return res.status(404).json({
+//         status: "error",
+//         message: "No bank details found for this user",
+//       });
+//     }
+
+//     // Delete related transactions
+//     await Promise.all([
+//       UserEditedSchema.findOneAndDelete({ userId }),
+//       AnotherBankTransaction.findOneAndDelete({ userId }),
+//       Transaction.findOneAndDelete({ userId }),
+//     ]);
+
+//     // Delete the user from User model
+//     await User.findByIdAndDelete(userId);
+
+//     // Respond with success
+//     return res.status(200).json({
+//       status: "success",
+//       message: "User and all related information deleted successfully",
+//     });
+//   } catch (error) {
+//     console.error("Error deleting user information:", error);
+//     return res.status(500).json({
+//       status: "error",
+//       message: "An error occurred while deleting user information",
+//     });
+//   }
+// };
+
+
