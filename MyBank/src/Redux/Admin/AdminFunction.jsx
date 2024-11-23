@@ -489,3 +489,21 @@ export function deleteUserEditedDataHistory(userId,editedHistoryId) {
     })  
   }
 }
+
+export function deleteUserData(userId) {
+  return async (dispatch)=>{
+    await axios.post(`/admin/delete-user-recorded-history/${userId}`, {}, { withCredentials: true })
+    .then(function (response){
+      console.log('response in slice', response.data);
+      dispatch(showSnackbar({ severity:'success', message: response.data.message }));
+      if (response.status === 200) {
+        dispatch(
+          updateGetAllUserForAdmin({ getAllUserOfAdmin: response.data.data })
+        );
+      }
+    }).catch(function (error){
+      console.log('error in place', error);
+      dispatch(showSnackbar({ severity:'error', message: error.message || 'Failed to delete user edited data history.'}));
+    })  
+  }
+}

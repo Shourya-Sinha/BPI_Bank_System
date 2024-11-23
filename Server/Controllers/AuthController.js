@@ -2457,6 +2457,74 @@ export const getEditedHistoryOfUser = async (req, res, next) => {
   }
 };
 
+export const deleteAllUserInfoAdmin = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    // Validate input
+    if (!userId) {
+      return res.status(400).json({
+        status: "error",
+        message: "User ID is required",
+      });
+    }
+
+    // Check if user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    // Delete related data
+    const userBank = await UserBank.findOneAndDelete({ userId });
+    if (!userBank) {
+      return res.status(404).json({
+        status: "error",
+        message: "No bank details found for this user",
+      });
+    }
+
+    // Delete related transactions
+    await Promise.all([
+      UserEditedSchema.findOneAndDelete({ userId }),
+      AnotherBankTransaction.findOneAndDelete({senderUserId:userId }),
+      Transaction.findOneAndDelete({ senderUserId:userId }),
+    ]);
+
+    // Delete the user from User model
+    await User.findByIdAndDelete(userId);
+
+    const allUsers = await User.find().select('firstName lastName email _id');
+    const usersWithBankRecords = await Promise.all(
+      allUsers.map(async (user) => {
+        const bankRecord = await UserBank.findOne({
+          userId: user._id,
+          isAccountPending: 'Verified',
+        }).select('balance');
+        return bankRecord ? { ...user.toObject(), balance: bankRecord.balance } : null;
+      })
+    );
+
+    const filteredUsers = usersWithBankRecords.filter(user => user !== null);
+
+    // Respond with success
+    return res.status(200).json({
+      status: "success",
+      message: "User and all related information deleted successfully",
+      data: filteredUsers,
+    });
+  } catch (error) {
+    console.error("Error deleting user information:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "An error occurred while deleting user information",
+    });
+  }
+};
+
 // export const deleteAllUserInfoAdmin = async (req, res, next) => {
 //   try {
 //     const { userId } = req.query;

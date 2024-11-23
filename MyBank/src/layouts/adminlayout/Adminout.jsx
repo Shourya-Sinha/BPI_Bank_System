@@ -30,6 +30,7 @@ import {
   getWeeklyData,
   LogoutAdminn,
 } from "../../Redux/Admin/AdminFunction";
+import { ManageHistory } from "@mui/icons-material";
 
 const Adminout = () => {
   const dispatch = useDispatch();
@@ -66,8 +67,8 @@ const Adminout = () => {
     },
     {
       key: "creditcard",
-      icon: <CreditCardOutlined />,
-      label: "Credit Card Holder",
+      icon: <ManageHistory />,
+      label: "Create History",
       path: "/admin/creditcard",
     },
     {

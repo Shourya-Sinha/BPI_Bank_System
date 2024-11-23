@@ -19,11 +19,12 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { East } from "@mui/icons-material";
+import { Delete, East } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import {
   CreteCreditEditedTransaction,
   CreteEditedTransaction,
+  deleteUserData,
   getALLUserForAdmin,
   getSingleUserForAdmin,
 } from "../../../Redux/Admin/AdminFunction";
@@ -39,8 +40,8 @@ const HiddenScrollbarContainer = styled("div")({
 
 const CredyCardUser = () => {
   const dispatch = useDispatch();
-  const [collapase,setCollapsed] =useState();
-  const [collapase1,setCollapsed1] =useState();
+  const [collapase, setCollapsed] = useState();
+  const [collapase1, setCollapsed1] = useState();
   const [selectedUserId, setSelectedUserId] = useState(null);
   const { getAllUserOfAdmin, getSingleUserData } = useSelector(
     (state) => state.admin || { getAllUserOfAdmin: [], getSingleUserData: {} }
@@ -71,7 +72,7 @@ const CredyCardUser = () => {
         ...prevFormData,
         userId: selectedUserId,
       }));
-  
+
       setFormData1((prevFormData) => ({
         ...prevFormData,
         userId: selectedUserId,
@@ -100,7 +101,7 @@ const CredyCardUser = () => {
 
   const handleInputChange = (e, formName) => {
     const { name, value } = e.target;
-  
+
     if (formName === "formData") {
       setFormData((prevFormData) => ({
         ...prevFormData,
@@ -130,7 +131,7 @@ const CredyCardUser = () => {
     e.preventDefault();
     // console.log("submitted data for formData1", formData1);
     dispatch(CreteCreditEditedTransaction(formData1));
-  
+
     // Reset form data after submission
     setFormData1({
       userId: selectedUserId,
@@ -141,17 +142,18 @@ const CredyCardUser = () => {
     });
   };
 
-  const handleCollapseSate=()=>{
-    setCollapsed(((prev)=> !prev));
-  }
-  const handleCollapseSate1=()=>{
-    setCollapsed1(((prev)=> !prev));
+  const handleCollapseSate = () => {
+    setCollapsed((prev) => !prev);
+  };
+  const handleCollapseSate1 = () => {
+    setCollapsed1((prev) => !prev);
+  };
+  const handleDeleteUser=(userId)=>{
+    dispatch(deleteUserData(userId));
   }
   return (
     <>
-      <Box
-        sx={{ width: "100%"}}
-      >
+      <Box sx={{ width: "100%" }}>
         <Typography variant="h5" sx={{ paddingY: 4 }}>
           Edit OR Create History for Each User
         </Typography>
@@ -202,22 +204,31 @@ const CredyCardUser = () => {
                   onClick={(e) => handleSelectedUser(user._id, e)}
                 >
                   <Avatar>
-    {user?.firstName && user?.lastName
-      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() // Generate initials
-      : "N/A"} {/* Default text if no name */}
-  </Avatar>
-                  <Stack sx={{width:'100%',paddingRight:3}}>
+                    {user?.firstName && user?.lastName
+                      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() // Generate initials
+                      : "N/A"}{" "}
+                    {/* Default text if no name */}
+                  </Avatar>
+                  <Stack sx={{ width: "100%", paddingRight: 3 }}>
                     <Typography variant="caption">{`${
                       user?.firstName || "N/A"
                     } ${user?.lastName || "N/A"}`}</Typography>
-                    <Typography variant="subtitle2" sx={{
-        wordWrap: "break-word", // Allows text to wrap within the container
-        overflow: "hidden", // Ensures it won't overflow
-        textOverflow: "ellipsis", // Adds ellipsis for overflowed text (optional)
-        maxWidth: "100%", // Ensures the email doesn't exceed the container's width
-      }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        wordWrap: "break-word", // Allows text to wrap within the container
+                        overflow: "hidden", // Ensures it won't overflow
+                        textOverflow: "ellipsis", // Adds ellipsis for overflowed text (optional)
+                        maxWidth: "100%", // Ensures the email doesn't exceed the container's width
+                      }}
+                    >
                       {user?.email || "N/A"}
                     </Typography>
+                  </Stack>
+                  <Stack>
+                    <IconButton onClick={()=>handleDeleteUser(user._id)}>
+                      <Delete sx={{color:'#e53935'}} />
+                    </IconButton>
                   </Stack>
                 </Stack>
               ))
@@ -235,206 +246,194 @@ const CredyCardUser = () => {
 
           {/* Right Side Create History */}
 
-<HiddenScrollbarContainer sx={{width:'60%',height:'70vh',overflowY:'scroll'}}>
-<Box sx={{ padding: 2, width: "100%" }}>
-            <Stack
-              spacing={2}
-              sx={{ boxShadow: 2, paddingX: 3, paddingY: 1, borderRadius: 1 }}
-            >
-              <Stack direction="row" alignItems="center" spacing={2}>
-                <Typography variant="h6">Selected User</Typography>
-                <East />
-                <Stack direction="row" alignItems="center" spacing={3}>
-                  <Typography variant="caption">
-                    User Name - {userName}
-                  </Typography>
-                  <Divider orientation="vertical" flexItem />
-                  <Typography variant="caption" >
-                    User Email - {userEmail}
-                  </Typography>
-                  <Divider orientation="vertical" flexItem />
-                  <Typography variant="caption">
-  Remaining Balance -&gt; {typeof userBalance === 'number' && !isNaN(userBalance) ? userBalance.toFixed(2) : 'N/A'}
-</Typography>
-
-                </Stack>
-              </Stack>
-            </Stack>
-            <Stack direction={'row'} alignItems={'center'} spacing={5}>
-            <Typography variant="h5" sx={{ padding: 3 }}>
-              Create Debit History
-            </Typography>
-
-            <IconButton onClick={handleCollapseSate}>
-             {collapase ?  <CaretDown /> : <CaretUp />}
-            </IconButton>
-            </Stack>
-           
-            <Collapse in={collapase}>
-            <form onSubmit={handleSubmitData}>
-              <Box>
+          <HiddenScrollbarContainer
+            sx={{ width: "60%", height: "70vh", overflowY: "scroll" }}
+          >
+            <Box sx={{ padding: 2, width: "100%" }}>
+              <Stack
+                spacing={2}
+                sx={{ boxShadow: 2, paddingX: 3, paddingY: 1, borderRadius: 1 }}
+              >
                 <Stack direction="row" alignItems="center" spacing={2}>
-                  {/* First Row of TextFields */}
-
-                  <Stack spacing={2} sx={{ boxShadow: 1, flexGrow: 1 }}>
-                    <TextField
-                      fullWidth
-                      required
-                      placeholder="Transaction Title"
-                      name="title"
-                      value={formData.title}
-                      onChange={(e) => handleInputChange(e, "formData")}
-                    />
-                    <TextField
-                      fullWidth
-                      required
-                      placeholder="Transaction Description"
-                      name="description"
-                      value={formData.description}
-                      onChange={(e) => handleInputChange(e, "formData")}
-                    />
-                  </Stack>
-
-                  {/* Second Row of TextFields */}
-                  <Stack spacing={2} sx={{ boxShadow: 1, flexGrow: 1 }}>
-                    <TextField
-                      fullWidth
-                      required
-                      placeholder="Transaction Amount"
-                      name="amount"
-                      value={formData.amount}
-                      onChange={(e) => handleInputChange(e, "formData")}
-                    />
-                    <TextField
-                      fullWidth
-                      required
-                      placeholder="Transaction Date"
-                      type="date"
-                      name="date"
-                      value={formData.date}
-                      onChange={(e) => handleInputChange(e, "formData")}
-                    />
+                  <Typography variant="h6">Selected User</Typography>
+                  <East />
+                  <Stack direction="row" alignItems="center" spacing={3}>
+                    <Typography variant="caption">
+                      User Name - {userName}
+                    </Typography>
+                    <Divider orientation="vertical" flexItem />
+                    <Typography variant="caption">
+                      User Email - {userEmail}
+                    </Typography>
+                    <Divider orientation="vertical" flexItem />
+                    <Typography variant="caption">
+                      Remaining Balance -&gt;{" "}
+                      {typeof userBalance === "number" && !isNaN(userBalance)
+                        ? userBalance.toFixed(2)
+                        : "N/A"}
+                    </Typography>
                   </Stack>
                 </Stack>
-              </Box>
-              <Stack sx={{ marginTop: 5 }}>
-                <Button
-                  variant="contained"
-                  sx={{ borderRadius: 0.5 }}
-                  type="submit"
-                >
-                  Create Transaction
-                </Button>
               </Stack>
-            </form>
-            </Collapse>
+              <Stack direction={"row"} alignItems={"center"} spacing={5}>
+                <Typography variant="h5" sx={{ padding: 3 }}>
+                  Create Debit History
+                </Typography>
 
-
-
-
-          </Box>
-          <Box sx={{width:'100%',marginTop:3,marginBottom:3}}>
-          <Divider > OR </Divider>
-          </Box>
-
-          <Box sx={{ padding: 2, width: "100%" }}>
-            <Stack
-              spacing={2}
-              sx={{ boxShadow: 2, paddingX: 3, paddingY: 1, borderRadius: 1 }}
-            >
-              <Stack direction="row" alignItems="center" spacing={2}>
-                <Typography variant="h6">Selected User</Typography>
-                <East />
-                <Stack direction="row" alignItems="center" spacing={3}>
-                  <Typography variant="caption">
-                    User Name - {userName}
-                  </Typography>
-                  <Divider orientation="vertical" flexItem />
-                  <Typography variant="caption" >
-                    User Email - {userEmail}
-                  </Typography>
-                  <Divider orientation="vertical" flexItem />
-                 
-
-                </Stack>
+                <IconButton onClick={handleCollapseSate}>
+                  {collapase ? <CaretDown /> : <CaretUp />}
+                </IconButton>
               </Stack>
-            </Stack>
-           <Stack direction="row" alignItems="center" spacing={5}>
-           <Typography variant="h5" sx={{ padding: 3 }}>
-              Create Credit History
-            </Typography>
-            <IconButton onClick={handleCollapseSate1}>
-             {collapase1?  <CaretDown /> : <CaretUp />}
-            </IconButton>
-           </Stack>
-           <Collapse in={collapase1}>
-           <form onSubmit={handleSubmitData2}>
-              <Box>
+
+              <Collapse in={collapase}>
+                <form onSubmit={handleSubmitData}>
+                  <Box>
+                    <Stack direction="row" alignItems="center" spacing={2}>
+                      {/* First Row of TextFields */}
+
+                      <Stack spacing={2} sx={{ boxShadow: 1, flexGrow: 1 }}>
+                        <TextField
+                          fullWidth
+                          required
+                          placeholder="Transaction Title"
+                          name="title"
+                          value={formData.title}
+                          onChange={(e) => handleInputChange(e, "formData")}
+                        />
+                        <TextField
+                          fullWidth
+                          required
+                          placeholder="Transaction Description"
+                          name="description"
+                          value={formData.description}
+                          onChange={(e) => handleInputChange(e, "formData")}
+                        />
+                      </Stack>
+
+                      {/* Second Row of TextFields */}
+                      <Stack spacing={2} sx={{ boxShadow: 1, flexGrow: 1 }}>
+                        <TextField
+                          fullWidth
+                          required
+                          placeholder="Transaction Amount"
+                          name="amount"
+                          value={formData.amount}
+                          onChange={(e) => handleInputChange(e, "formData")}
+                        />
+                        <TextField
+                          fullWidth
+                          required
+                          placeholder="Transaction Date"
+                          type="date"
+                          name="date"
+                          value={formData.date}
+                          onChange={(e) => handleInputChange(e, "formData")}
+                        />
+                      </Stack>
+                    </Stack>
+                  </Box>
+                  <Stack sx={{ marginTop: 5 }}>
+                    <Button
+                      variant="contained"
+                      sx={{ borderRadius: 0.5 }}
+                      type="submit"
+                    >
+                      Create Transaction
+                    </Button>
+                  </Stack>
+                </form>
+              </Collapse>
+            </Box>
+            <Box sx={{ width: "100%", marginTop: 3, marginBottom: 3 }}>
+              <Divider> OR </Divider>
+            </Box>
+
+            <Box sx={{ padding: 2, width: "100%" }}>
+              <Stack
+                spacing={2}
+                sx={{ boxShadow: 2, paddingX: 3, paddingY: 1, borderRadius: 1 }}
+              >
                 <Stack direction="row" alignItems="center" spacing={2}>
-
-                  <Stack spacing={2} sx={{ boxShadow: 1, flexGrow: 1 }}>
-                    <TextField
-                      fullWidth
-                      required
-                      placeholder="Transaction Title"
-                      name="title"
-                      value={formData1.title}
-                      onChange={(e) => handleInputChange(e, "formData1")}
-                    />
-                    <TextField
-                      fullWidth
-                      required
-                      placeholder="Transaction Description"
-                      name="description"
-                      value={formData1.description}
-                      onChange={(e) => handleInputChange(e, "formData1")}
-                    />
-                  </Stack>
-
-                  <Stack spacing={2} sx={{ boxShadow: 1, flexGrow: 1 }}>
-                    <TextField
-                      fullWidth
-                      required
-                      placeholder="Transaction Amount"
-                      name="amount"
-                      value={formData1.amount}
-                      onChange={(e) => handleInputChange(e, "formData1")}
-                    />
-                    <TextField
-                      fullWidth
-                      required
-                      placeholder="Transaction Date"
-                      type="date"
-                      name="date"
-                      value={formData1.date}
-                      onChange={(e) => handleInputChange(e, "formData1")}
-                    />
+                  <Typography variant="h6">Selected User</Typography>
+                  <East />
+                  <Stack direction="row" alignItems="center" spacing={3}>
+                    <Typography variant="caption">
+                      User Name - {userName}
+                    </Typography>
+                    <Divider orientation="vertical" flexItem />
+                    <Typography variant="caption">
+                      User Email - {userEmail}
+                    </Typography>
+                    <Divider orientation="vertical" flexItem />
                   </Stack>
                 </Stack>
-              </Box>
-              <Stack sx={{ marginTop: 5 }}>
-                <Button
-                type="submit"
-                  variant="contained"
-                  sx={{ borderRadius: 0.5 }}
-                >
-                  Create Transaction
-                </Button>
               </Stack>
-            </form>
-           </Collapse>
+              <Stack direction="row" alignItems="center" spacing={5}>
+                <Typography variant="h5" sx={{ padding: 3 }}>
+                  Create Credit History
+                </Typography>
+                <IconButton onClick={handleCollapseSate1}>
+                  {collapase1 ? <CaretDown /> : <CaretUp />}
+                </IconButton>
+              </Stack>
+              <Collapse in={collapase1}>
+                <form onSubmit={handleSubmitData2}>
+                  <Box>
+                    <Stack direction="row" alignItems="center" spacing={2}>
+                      <Stack spacing={2} sx={{ boxShadow: 1, flexGrow: 1 }}>
+                        <TextField
+                          fullWidth
+                          required
+                          placeholder="Transaction Title"
+                          name="title"
+                          value={formData1.title}
+                          onChange={(e) => handleInputChange(e, "formData1")}
+                        />
+                        <TextField
+                          fullWidth
+                          required
+                          placeholder="Transaction Description"
+                          name="description"
+                          value={formData1.description}
+                          onChange={(e) => handleInputChange(e, "formData1")}
+                        />
+                      </Stack>
 
-
-
-
-          </Box>
-</HiddenScrollbarContainer>
-
-
-        
+                      <Stack spacing={2} sx={{ boxShadow: 1, flexGrow: 1 }}>
+                        <TextField
+                          fullWidth
+                          required
+                          placeholder="Transaction Amount"
+                          name="amount"
+                          value={formData1.amount}
+                          onChange={(e) => handleInputChange(e, "formData1")}
+                        />
+                        <TextField
+                          fullWidth
+                          required
+                          placeholder="Transaction Date"
+                          type="date"
+                          name="date"
+                          value={formData1.date}
+                          onChange={(e) => handleInputChange(e, "formData1")}
+                        />
+                      </Stack>
+                    </Stack>
+                  </Box>
+                  <Stack sx={{ marginTop: 5 }}>
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      sx={{ borderRadius: 0.5 }}
+                    >
+                      Create Transaction
+                    </Button>
+                  </Stack>
+                </form>
+              </Collapse>
+            </Box>
+          </HiddenScrollbarContainer>
         </Box>
-
-      
       </Box>
     </>
   );
